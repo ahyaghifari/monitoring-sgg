@@ -11,7 +11,7 @@
     @vite(['resources/css/app.css'])
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
-<body>
+<body class="monitoring-page-wrapper">
     {{-- Latar belakang modern bertema IT (Tech Grid, Ambient Glow, dan Floating Icons) --}}
     <x-tech-background />
 
@@ -76,9 +76,7 @@
                      data-project='@json($project)'
                      data-company="{{ $project['company_id'] }}"
                      data-pic="{{ $project['pic_id'] }}"
-                     style="--delay: {{ $index * 60 }}ms; animation-delay: var(--delay);"
-                     onclick="openDetailModal(this)"
-                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailModal(this);}">
+                     style="--delay: {{ $index * 60 }}ms">
                     {{-- 1. Logo, perusahaan, dan nama project --}}
                     <div class="sgg-card-info">
                         @if($project['logo'])
@@ -110,6 +108,10 @@
                                 @endif
                             </div>
                         @endif
+                        {{-- 4. Catatan PIC (hanya di kartu, tidak di modal detail) --}}
+                        @if(!empty($project['catatan_pic']))
+                            <p class="sgg-card-desc mt-1.5"><strong>Catatan PIC:</strong> {{ $project['catatan_pic'] }}</p>
+                        @endif
                     </div>
                     {{-- Badge urgensi dan status --}}
                     <div class="sgg-card-badges">
@@ -119,7 +121,7 @@
                     {{-- Progress bar --}}
                     <div class="sgg-card-progress">
                         <div class="sgg-progress-track">
-                            <div class="sgg-progress-fill" style="--percent: {{ $project['progress_percent'] }}%; width: var(--percent);"></div>
+                            <div class="sgg-progress-fill" style="--percent: {{ $project['progress_percent'] }}%"></div>
                         </div>
                         <span class="sgg-progress-text">{{ $project['progress_percent'] }}%</span>
                     </div>
@@ -145,7 +147,7 @@
     </main>
 
     {{-- Modal popup detail project (Read Only) --}}
-    <div class="sgg-modal-overlay" id="detail-overlay" onclick="if(event.target===this) closeDetailModal()">
+    <div class="sgg-modal-overlay" id="detail-overlay">
         <div class="sgg-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
             <div class="sgg-modal-header">
                 <div class="sgg-modal-header-info">
@@ -153,7 +155,7 @@
                     <div class="sgg-modal-title" id="detail-title"></div>
                     <div class="sgg-modal-badges" id="detail-badges"></div>
                 </div>
-                <button class="sgg-modal-close" onclick="closeDetailModal()" aria-label="Tutup">
+                <button type="button" class="sgg-modal-close" data-close-modal aria-label="Tutup">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -164,23 +166,24 @@
             <div class="sgg-modal-progress-section">
                 <span class="sgg-modal-progress-label">Progres</span>
                 <div class="sgg-progress-track">
-                    <div class="sgg-progress-fill" id="detail-progress-fill" style="width: 0%"></div>
+                    <div class="sgg-progress-fill" id="detail-progress-fill"></div>
                 </div>
                 <span class="sgg-modal-progress-pct" id="detail-progress-pct">0%</span>
             </div>
 
-            {{-- Daftar tugas (diisi oleh app.js) --}}
+            {{-- Daftar tugas checklist (diisi oleh monitoring.js) --}}
             <div class="sgg-modal-body">
                 <div class="sgg-modal-body-title">Daftar Tugas</div>
                 <div id="detail-checklist-container"></div>
             </div>
 
             <div class="sgg-modal-footer">
-                <button class="sgg-modal-close-btn" onclick="closeDetailModal()">Tutup</button>
+                <button type="button" class="sgg-modal-close-btn" data-close-modal>Tutup</button>
             </div>
         </div>
     </div>
 
+    <script src="{{ asset('js/monitoring.js') }}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

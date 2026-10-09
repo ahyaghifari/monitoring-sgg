@@ -8,11 +8,16 @@ use App\Models\Project;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -30,6 +35,30 @@ class ProjectResource extends Resource
     protected static ?string $pluralModelLabel = 'Daftar Project';
 
     protected static ?int $navigationSort = 2;
+
+    private const URGENCY_LABELS = [
+        'Low' => 'Rendah',
+        'Medium' => 'Sedang',
+        'High' => 'Tinggi',
+        'Urgent' => 'Darurat',
+    ];
+
+    private const STATUS_LABELS = [
+        'In Progress' => 'Dalam Proses',
+        'Completed' => 'Selesai',
+    ];
+
+    private const URGENCY_COLORS = [
+        'Low' => 'gray',
+        'Medium' => 'info',
+        'High' => 'warning',
+        'Urgent' => 'danger',
+    ];
+
+    private const STATUS_COLORS = [
+        'In Progress' => 'warning',
+        'Completed' => 'success',
+    ];
 
     // -------------------------------------------------------------------------
     // Form identitas project (Create & Edit modal); tugas dikelola lewat modal Kelola Tugas
@@ -70,6 +99,11 @@ class ProjectResource extends Resource
                 ->placeholder('Contoh: Ahmad Subagja')
                 ->maxLength(255),
 
+            Textarea::make('catatan_pic')
+                ->label('Catatan PIC')
+                ->rows(2)
+                ->columnSpanFull(),
+
             FileUpload::make('logo')
                 ->label('Logo Project')
                 ->image()
@@ -81,26 +115,81 @@ class ProjectResource extends Resource
 
             Select::make('urgency')
                 ->label('Tingkat Urgensi')
-                ->options([
-                    'Low'    => 'Rendah',
-                    'Medium' => 'Sedang',
-                    'High'   => 'Tinggi',
-                    'Urgent' => 'Darurat',
-                ])
+                ->options(self::URGENCY_LABELS)
                 ->default('Medium')
                 ->required(),
 
             Select::make('status')
                 ->label('Status Project')
-                ->options([
-                    'In Progress' => 'Dalam Proses',
-                    'Completed'   => 'Selesai',
-                ])
+                ->options(self::STATUS_LABELS)
                 ->default('In Progress')
-                ->helperText('Otomatis mengikuti daftar tugas jika project memiliki tugas.')
+                ->helperText('Otomatis mengikuti progress jika project memiliki tugas.')
                 ->required(),
 
+            Radio::make('progress_mode')
+                ->label('Mode Progress')
+                ->options([
+                    'auto' => 'Otomatis (Checklist)',
+                    'manual' => 'Manual',
+                ])
+                ->default('auto')
+                ->inline()
+                ->live()
+                ->required()
+                ->columnSpanFull(),
+
+            self::checklistRepeater(),
+            self::manualProgressInput(),
+
         ])->columns(2);
+    }
+
+    // Form & modal Kelola Tugas hanya menampilkan isian mode aktif.
+    // Field yang tersembunyi tidak ikut disimpan, jadi data mode lain (task / angka manual) tetap utuh.
+
+    // Checklist task: hanya tampil di mode auto, tersimpan saat Simpan
+    protected static function checklistRepeater(): Repeater
+    {
+        return Repeater::make('checklists')
+            ->label('Checklist Task')
+            ->relationship()
+            ->schema([
+                TextInput::make('title')
+                    ->label('Nama Tugas')
+                    ->required()
+                    ->maxLength(255),
+
+                Checkbox::make('is_completed')
+                    ->label('Selesai')
+                    ->inline(false),
+            ])
+            ->columns(2)
+            ->addActionLabel('Tambah Tugas')
+            ->defaultItems(0)
+            ->reorderable(false)
+            ->visible(fn (Get $get): bool => $get('progress_mode') !== 'manual')
+            ->columnSpanFull();
+    }
+
+    // Persentase progress manual: satu angka 0-100, hanya tampil di mode manual
+    protected static function manualProgressInput(): TextInput
+    {
+        $rangeMessage = 'Nilai persentase harus berada di antara 0 hingga 100. Silakan sesuaikan kembali nilai isian Anda.';
+
+        return TextInput::make('manual_progress')
+            ->label('Persentase Progress (%)')
+            ->integer()
+            ->minValue(0)
+            ->maxValue(100)
+            ->step(1)
+            ->default(0)
+            ->suffix('%')
+            ->required()
+            ->validationMessages([
+                'min' => $rangeMessage,
+                'max' => $rangeMessage,
+            ])
+            ->visible(fn (Get $get): bool => $get('progress_mode') === 'manual');
     }
 
     // -------------------------------------------------------------------------
@@ -124,34 +213,14 @@ class ProjectResource extends Resource
                 TextColumn::make('urgency')
                     ->label('Urgensi')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'Low'    => 'Rendah',
-                        'Medium' => 'Sedang',
-                        'High'   => 'Tinggi',
-                        'Urgent' => 'Darurat',
-                        default  => $state,
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        'Low'    => 'gray',
-                        'Medium' => 'info',
-                        'High'   => 'warning',
-                        'Urgent' => 'danger',
-                        default  => 'gray',
-                    }),
+                    ->formatStateUsing(fn (string $state): string => self::URGENCY_LABELS[$state] ?? $state)
+                    ->color(fn (string $state): string => self::URGENCY_COLORS[$state] ?? 'gray'),
 
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'In Progress' => 'Dalam Proses',
-                        'Completed'   => 'Selesai',
-                        default       => $state,
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        'In Progress' => 'warning',
-                        'Completed'   => 'success',
-                        default       => 'gray',
-                    }),
+                    ->formatStateUsing(fn (string $state): string => self::STATUS_LABELS[$state] ?? $state)
+                    ->color(fn (string $state): string => self::STATUS_COLORS[$state] ?? 'gray'),
 
                 TextColumn::make('progress_percent')
                     ->label('Progress')
@@ -161,15 +230,39 @@ class ProjectResource extends Resource
             // Klik baris membuka modal Kelola Tugas
             ->recordAction('manageTasks')
             ->actions([
-                // Modal daftar tugas; tiap aksi tersimpan langsung, cukup tombol tutup
+                // Pemilih mode di atas; mode, checklist, dan persentase manual tersimpan bersamaan saat Simpan
                 Action::make('manageTasks')
                     ->label('Tugas')
                     ->icon('heroicon-o-check-circle')
                     ->modalHeading(fn (Project $record): string => "Kelola Tugas — {$record->title}")
-                    ->modalContent(fn (Project $record) => view('filament.manage-tasks-modal', ['record' => $record]))
+                    ->modalDescription('Perubahan mode, checklist, dan persentase manual tersimpan setelah tombol Simpan diklik.')
+                    ->fillForm(fn (Project $record): array => $record->only(['progress_mode', 'manual_progress']))
+                    ->schema([
+                        ToggleButtons::make('progress_mode')
+                            ->label('Mode Progress')
+                            ->options([
+                                'auto' => 'Otomatis (Checklist)',
+                                'manual' => 'Manual (Persentase)',
+                            ])
+                            ->icons([
+                                'auto' => 'heroicon-o-check-circle',
+                                'manual' => 'heroicon-o-chart-bar',
+                            ])
+                            ->inline()
+                            ->live()
+                            ->required(),
+
+                        self::checklistRepeater(),
+                        self::manualProgressInput(),
+                    ])
+                    ->action(function (array $data, Project $record, Action $action): void {
+                        $record->update($data);
+                        $action->success();
+                    })
+                    ->successNotificationTitle('Perubahan berhasil disimpan.')
                     ->modalWidth('3xl')
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Kembali'),
+                    ->modalSubmitActionLabel('Simpan')
+                    ->modalCancelActionLabel('Tutup'),
 
                 EditAction::make()
                     ->label('Ubah')

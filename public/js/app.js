@@ -1,61 +1,3 @@
-// Pemetaan nilai urgensi ke kelas badge dan label Bahasa Indonesia
-const URGENCY_MAP = {
-    'Low':    { cls: 'sgg-badge--low',    label: 'Rendah'  },
-    'Medium': { cls: 'sgg-badge--medium', label: 'Sedang'  },
-    'High':   { cls: 'sgg-badge--high',   label: 'Tinggi'  },
-    'Urgent': { cls: 'sgg-badge--urgent', label: 'Darurat' },
-};
-
-// Mengamankan teks dari input pengguna sebelum disisipkan ke HTML
-function escapeHtml(t) {
-    const d = document.createElement('div');
-    d.textContent = t;
-    return d.innerHTML;
-}
-
-// Membuat markup badge berwarna
-function badge(cls, label) {
-    return `<span class="sgg-badge ${cls}"><span class="sgg-badge-dot"></span>${label}</span>`;
-}
-
-// Menampilkan modal detail saat kartu project diklik
-function openDetailModal(cardEl) {
-    const p = JSON.parse(cardEl.getAttribute('data-project'));
-    const u = URGENCY_MAP[p.urgency] || URGENCY_MAP['Low'];
-    const done = p.status === 'Completed';
-
-    document.getElementById('detail-company').textContent = p.company_name;
-    document.getElementById('detail-title').textContent = p.title;
-    document.getElementById('detail-badges').innerHTML =
-        badge(u.cls, u.label) +
-        badge(done ? 'sgg-badge--completed' : 'sgg-badge--progress', done ? 'Selesai' : 'Dalam Proses');
-    document.getElementById('detail-progress-fill').style.width = p.progress_percent + '%';
-    document.getElementById('detail-progress-pct').textContent = p.progress_percent + '%';
-
-    // Render daftar tugas (read-only)
-    document.getElementById('detail-checklist-container').innerHTML = p.checklists.length === 0
-        ? '<p style="color:#9ca3af;font-size:14px;padding:8px 0;">Belum ada tugas pada project ini.</p>'
-        : p.checklists.map(c => `
-            <div class="sgg-checklist-item ${c.is_completed ? 'checked' : ''}">
-                <div class="sgg-checklist-checkbox" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </div>
-                <span class="sgg-checklist-label">${escapeHtml(c.title)}</span>
-                <span class="sgg-checklist-state">${c.is_completed ? 'Selesai' : 'Belum'}</span>
-            </div>`).join('');
-
-    document.getElementById('detail-overlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-// Menutup modal detail dan mengembalikan scroll halaman
-function closeDetailModal() {
-    document.getElementById('detail-overlay').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
 // Filter kartu project berdasarkan perusahaan & PIC (tanpa reload)
 function applyFilters() {
     const company = document.getElementById('filter-company').value;
@@ -110,7 +52,7 @@ async function refreshProjects() {
             const cardId = card => JSON.parse(card.dataset.project).id;
             const oldWidths = {};
             list.querySelectorAll('.sgg-project-card').forEach(card => {
-                oldWidths[cardId(card)] = card.querySelector('.sgg-progress-fill').style.width;
+                oldWidths[cardId(card)] = card.querySelector('.sgg-progress-fill').style.getPropertyValue('--percent');
             });
 
             list.classList.add('is-refreshed'); // Matikan animasi masuk saat refresh
@@ -120,11 +62,11 @@ async function refreshProjects() {
             list.querySelectorAll('.sgg-project-card').forEach(card => {
                 const fill = card.querySelector('.sgg-progress-fill');
                 const old = oldWidths[cardId(card)];
-                if (old === undefined || old === fill.style.width) return;
-                const target = fill.style.width;
-                fill.style.width = old;
+                if (old === undefined || old === fill.style.getPropertyValue('--percent')) return;
+                const target = fill.style.getPropertyValue('--percent');
+                fill.style.setProperty('--percent', old);
                 fill.getBoundingClientRect(); // Paksa reflow agar lebar lama tercatat
-                fill.style.width = target;
+                fill.style.setProperty('--percent', target);
             });
         }
 
@@ -136,8 +78,3 @@ async function refreshProjects() {
 
 setInterval(refreshProjects, REFRESH_MS);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshProjects(); });
-
-// Tombol Esc menutup modal
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDetailModal();
-});

@@ -20,21 +20,22 @@ class MonitoringController extends Controller
             ->get()
             // Ubah ke array ringan untuk view dan atribut data-project di kartu
             ->map(fn (Project $p) => [
-                'id'                  => $p->id,
-                'company_id'          => $p->company_id,
-                'company_name'        => $p->company?->name ?? '-',
-                'title'               => $p->title,
-                'description'         => $p->description,
-                'pic_id'              => $p->pic_id,
-                'pic_name'            => $p->pic?->nama,
-                'pemohon'             => $p->pemohon,
-                'logo'                => $p->logo,
-                'urgency'             => $p->urgency,
-                'status'              => $p->status,
-                // Persentase tugas selesai, dihitung oleh accessor di model Project
-                'progress_percent'    => $p->progress_percent,
-                'checklists'          => $p->checklists->map(fn ($c) => [
-                    'title'        => $c->title,
+                'id' => $p->id,
+                'company_id' => $p->company_id,
+                'company_name' => $p->company?->name ?? '-',
+                'title' => $p->title,
+                'description' => $p->description,
+                'pic_id' => $p->pic_id,
+                'pic_name' => $p->pic?->nama,
+                'pemohon' => $p->pemohon,
+                'catatan_pic' => $p->catatan_pic,
+                'logo' => $p->logo,
+                'urgency' => $p->urgency,
+                'status' => $p->status,
+                // Persentase sesuai mode (auto/manual), dihitung oleh accessor di model Project
+                'progress_percent' => $p->progress_percent,
+                'checklists' => $p->checklists->map(fn ($c) => [
+                    'title' => $c->title,
                     'is_completed' => $c->is_completed,
                 ])->values()->toArray(),
             ]);

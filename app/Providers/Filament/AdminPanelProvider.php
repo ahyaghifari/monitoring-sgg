@@ -7,8 +7,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\View\PanelsRenderHook;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -30,10 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Syifa Global Group')
             ->darkMode(true)
             ->userMenu(false)                // Dropdown profil diganti badge peran + tema + logout
-            ->renderHook(
-                PanelsRenderHook::BODY_START,
-                fn (): string => view('components.tech-background')->render(),
-            )
+            // Latar animasi IT sengaja tidak dipasang di admin: layer-nya menutupi form login
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
                 fn (): string => view('filament.topbar-user')->render(),

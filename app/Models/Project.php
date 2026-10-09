@@ -16,17 +16,25 @@ class Project extends Model
         'description',
         'pic_id',
         'pemohon',
+        'catatan_pic',
         'logo',
         'urgency',
         'status',
+        'progress_mode',
+        'manual_progress',
+    ];
+
+    // Checklist (tabel relasi) & persentase manual (kolom angka) terpisah: ganti mode tidak menghapus salah satunya
+    protected $casts = [
+        'manual_progress' => 'integer',
     ];
 
     // Event: sinkron status dari tugas & bersihkan file logo di disk public
     protected static function booted(): void
     {
-        // Status ikut daftar tugas; project tanpa tugas tetap pakai status manual dari form
+        // Status ikut progress; project auto tanpa tugas tetap pakai status manual dari form
         static::saved(function (Project $project) {
-            if ($project->checklists()->exists()) {
+            if ($project->isManualMode() || $project->checklists()->exists()) {
                 $project->syncStatus();
             }
         });
@@ -64,12 +72,22 @@ class Project extends Model
         return $this->hasMany(ProjectChecklist::class);
     }
 
-    // Status otomatis: 'Completed' jika semua tugas selesai, selain itu 'In Progress'
+    public function isManualMode(): bool
+    {
+        return $this->progress_mode === 'manual';
+    }
+
+    // Status otomatis: 'Completed' jika progress mode aktif selesai, selain itu 'In Progress'
     public function syncStatus(): void
     {
-        $total = $this->checklists()->count();
-        $done = $this->checklists()->where('is_completed', true)->count();
-        $status = $total > 0 && $done === $total ? 'Completed' : 'In Progress';
+        if ($this->isManualMode()) {
+            $isCompleted = $this->manual_progress === 100;
+        } else {
+            $total = $this->checklists()->count();
+            $isCompleted = $total > 0 && $this->checklists()->where('is_completed', true)->count() === $total;
+        }
+
+        $status = $isCompleted ? 'Completed' : 'In Progress';
 
         // Query langsung: tanpa event (tidak berulang) dan aman dipanggil dari dalam event saved
         if ($this->status !== $status) {
@@ -79,12 +97,17 @@ class Project extends Model
     }
 
     // Accessor
-    // Persentase tugas selesai: (selesai / total) * 100, 0 jika belum ada tugas.
-    // Memakai relasi yang sudah di-eager load agar tidak query per kartu.
+    // Mode manual: nilai persentase tunggal dari kolom manual_progress.
+    // Mode auto: (tugas selesai / total) * 100, 0 jika belum ada tugas;
+    // memakai relasi yang sudah di-eager load agar tidak query per kartu.
     protected function progressPercent(): Attribute
     {
         return Attribute::make(
             get: function () {
+                if ($this->isManualMode()) {
+                    return (int) $this->manual_progress;
+                }
+
                 $total = $this->checklists->count();
 
                 if ($total === 0) {
