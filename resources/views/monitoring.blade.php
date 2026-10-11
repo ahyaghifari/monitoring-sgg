@@ -48,7 +48,7 @@
                             <span class="sgg-live" title="Data diperbarui otomatis tiap 10 detik">
                                 <span class="sgg-live-dot"></span>Live
                             </span>
-                            <button type="button" class="sgg-theme sgg-team-btn" id="pic-open" aria-haspopup="dialog">Tim PIC</button>
+                            <button type="button" class="sgg-theme sgg-team-btn" id="pic-open" aria-haspopup="dialog">PIC</button>
                             {{-- Tombol tema berupa ikon: bulan = pindah ke gelap, matahari = pindah ke terang (diatur app.js) --}}
                             <button type="button" class="sgg-theme sgg-theme--icon" id="theme-toggle" data-current="light" aria-label="Ganti ke mode gelap" title="Ganti ke mode gelap">
                                 <svg class="ico-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -221,7 +221,7 @@
             <div class="sgg-modal-header">
                 <div class="sgg-modal-header-info">
                     <div class="sgg-modal-company">{{ $pics->count() }} orang</div>
-                    <div class="sgg-modal-title" id="pic-title">Tim PIC</div>
+                    <div class="sgg-modal-title" id="pic-title">PIC</div>
                 </div>
                 <button type="button" class="sgg-modal-close" data-close-pic aria-label="Tutup">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
