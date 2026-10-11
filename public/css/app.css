@@ -703,6 +703,27 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     .sgg-card-meta:not(:has(.sgg-pic-note)) { display: none; }
 }
 
+/* ---------- Desktop: deskripsi, catatan, dan status di kartu diperkecil ---------- */
+@media (min-width: 768px) {
+    .sgg-card-desc { font-size: 12.5px; line-height: 1.4; }
+    .sgg-pic-note { font-size: 12px; }
+    .sgg-card-badges { gap: 6px; }
+    .sgg-card-badges .sgg-badge { font-size: 10.5px; padding: 2px 9px; border-width: 1.5px; gap: 5px; }
+    .sgg-card-badges .sgg-badge-dot { width: 6px; height: 6px; }
+    .sgg-card-progress .sgg-progress-track { height: 12px; }
+    .sgg-card-progress .sgg-progress-text { font-size: 13px; }
+}
+
+/* ---------- Desktop lebar: daftar project 2 kolom di dalam monitor ---------- */
+@media (min-width: 1100px) {
+    .sgg-project-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    /* Isi kartu disusun satu kolom (setengah lebar): info, isi, badge, progress */
+    .sgg-project-card, .sgg-project-card.has-photo { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .sgg-card-info, .sgg-card-body, .sgg-card-badges, .sgg-card-progress { grid-column: 1; grid-row: auto; }
+    .sgg-card-badges { justify-content: flex-start; align-self: auto; }
+    .sgg-card-progress { align-self: auto; }
+}
+
 /* ---------- Motion (hanya bila diizinkan) ---------- */
 @media (prefers-reduced-motion: no-preference) {
     .sgg-caret { animation: blink 1.1s steps(2, start) infinite; }
