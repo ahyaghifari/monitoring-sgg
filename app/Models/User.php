@@ -49,8 +49,10 @@ class User extends Authenticatable implements FilamentUser
     // Super Admin boleh mengelola tugas semua project; PIC hanya project miliknya
     public function canManageProject(Project $project): bool
     {
+        $picId = $this->pic?->id;
+
         return $this->isSuperAdmin()
-            || ($project->pic_id !== null && $this->pic?->id === $project->pic_id);
+            || ($picId !== null && in_array($picId, [$project->pic_id, $project->pic_kedua_id], true));
     }
 
     // Super Admin boleh mengakses semua menu admin

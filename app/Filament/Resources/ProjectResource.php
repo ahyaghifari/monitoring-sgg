@@ -95,6 +95,14 @@ class ProjectResource extends Resource
                 // Pakai form PicResource agar aturan wajib isi tetap sama
                 ->createOptionForm(fn (Schema $schema) => PicResource::form($schema)),
 
+            Select::make('pic_kedua_id')
+                ->label('PIC Kedua')
+                ->helperText('Opsional. Tampil di belakang PIC utama pada kartu.')
+                ->relationship('picKedua', 'nama')
+                ->different('pic_id')
+                ->searchable()
+                ->preload(),
+
             TextInput::make('pemohon')
                 ->label('Pemohon')
                 ->placeholder('Contoh: Ahmad Subagja')

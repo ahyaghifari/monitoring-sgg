@@ -46,4 +46,10 @@ class Pic extends Model
     {
         return $this->hasMany(Project::class);
     }
+
+    // Project yang menempatkan PIC ini sebagai PIC kedua
+    public function projectsKedua(): HasMany
+    {
+        return $this->hasMany(Project::class, 'pic_kedua_id');
+    }
 }

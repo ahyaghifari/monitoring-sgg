@@ -19,7 +19,7 @@ class MonitoringController extends Controller
         $viewer = auth()->user();
 
         // Mengambil data project beserta relasi tugas, perusahaan, dan PIC, terbaru di atas
-        $projects = Project::with(['company', 'pic', 'checklists'])
+        $projects = Project::with(['company', 'pic', 'picKedua', 'checklists'])
             ->orderBy('created_at', 'desc')
             ->get()
             // Ubah ke array ringan untuk view dan atribut data-project di kartu
@@ -28,7 +28,7 @@ class MonitoringController extends Controller
         // Opsi dropdown filter dashboard
         $companies = Company::orderBy('name')->get(['id', 'name']);
         // Data PIC lengkap untuk dropdown filter dan modal daftar tim
-        $pics = Pic::withCount('projects')->orderBy('nama')->get(['id', 'nama', 'foto', 'jabatan', 'divisi']);
+        $pics = Pic::withCount(['projects', 'projectsKedua'])->orderBy('nama')->get(['id', 'nama', 'foto', 'jabatan', 'divisi']);
 
         return view('monitoring', compact('projects', 'companies', 'pics', 'viewer'));
     }
@@ -49,6 +49,9 @@ class MonitoringController extends Controller
             'pic_id' => $p->pic_id,
             'pic_name' => $p->pic?->nama,
             'pic_photo' => $p->pic?->foto,
+            'pic_kedua_id' => $p->pic_kedua_id,
+            'pic_kedua_name' => $p->picKedua?->nama,
+            'pic_kedua_photo' => $p->picKedua?->foto,
             'pemohon' => $p->pemohon,
             'catatan_pic' => $p->catatan_pic,
             'logo' => $p->logo,

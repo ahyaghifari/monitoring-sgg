@@ -50,7 +50,7 @@ class ProjectTaskController extends Controller
     // Kembalikan data project terbaru agar kartu dan modal bisa diperbarui tanpa reload
     private function respond(Request $request, Project $project): JsonResponse
     {
-        $project = $project->fresh(['company', 'pic', 'checklists']);
+        $project = $project->fresh(['company', 'pic', 'picKedua', 'checklists']);
 
         return response()->json(['project' => MonitoringController::payload($project, $request->user())]);
     }

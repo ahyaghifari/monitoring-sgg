@@ -7,7 +7,7 @@ function applyFilters() {
 
     document.querySelectorAll('.sgg-project-card').forEach(card => {
         const show = (!company || card.dataset.company === company)
-            && (!pic || card.dataset.pic === pic)
+            && (!pic || card.dataset.pic === pic || card.dataset.pic2 === pic)
             && (!status || card.dataset.status === status);
         card.hidden = !show;
         if (show) visible++;

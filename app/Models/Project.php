@@ -15,6 +15,7 @@ class Project extends Model
         'title',
         'description',
         'pic_id',
+        'pic_kedua_id',
         'pemohon',
         'catatan_pic',
         'logo',
@@ -66,6 +67,12 @@ class Project extends Model
     public function pic(): BelongsTo
     {
         return $this->belongsTo(Pic::class);
+    }
+
+    // PIC kedua (opsional)
+    public function picKedua(): BelongsTo
+    {
+        return $this->belongsTo(Pic::class, 'pic_kedua_id');
     }
 
     public function checklists(): HasMany

@@ -703,6 +703,22 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     .sgg-card-meta:not(:has(.sgg-pic-note)) { display: none; }
 }
 
+/* ---------- Dua PIC: PIC utama di depan, PIC kedua di belakang namun tetap terlihat ---------- */
+.sgg-card-piccap-2 { font-weight: 600; opacity: .85; font-size: 11px; }
+@media (min-width: 768px) {
+    /* Foto utama 120px di depan; foto kedua digeser 40px ke kanan sehingga tepinya mengintip */
+    .sgg-project-card.has-photo2 { padding-left: calc(var(--photo-w, 130px) + 40px + 24px); }
+    .sgg-card-bgphoto:not(.sgg-card-bgphoto--initial):not(.sgg-card-bgphoto--second) { z-index: 1; }
+    .sgg-card-bgphoto--second:not(.sgg-card-bgphoto--initial) {
+        z-index: 0; left: 40px; filter: brightness(.88) saturate(.9);
+    }
+    .sgg-project-card.has-photo2 .sgg-card-piccap { z-index: 2; }
+}
+@media (max-width: 767px) {
+    .sgg-card-picavatar--second { position: relative; z-index: 0; margin-right: -12px; opacity: .9; }
+    .sgg-card-picavatar:not(.sgg-card-picavatar--second) { position: relative; z-index: 1; }
+}
+
 /* ---------- Tombol masuk/keluar PIC: mobile di kaki monitor, desktop di pojok kanan bar filter ---------- */
 .sgg-bar-auth { display: none; }
 @media (min-width: 768px) {

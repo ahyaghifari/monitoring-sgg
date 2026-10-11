@@ -102,14 +102,19 @@
                                         $statusClass = $project['status'] === 'Completed' ? 'sgg-badge--completed' : 'sgg-badge--progress';
                                         $statusLabel = $project['status'] === 'Completed' ? 'Selesai' : 'Dalam Proses';
                                     @endphp
-                                    <div class="sgg-project-card{{ $project['color'] ? ' has-color' : '' }}{{ $project['pic_photo'] ? ' has-photo' : '' }}"
+                                    <div class="sgg-project-card{{ $project['color'] ? ' has-color' : '' }}{{ $project['pic_photo'] ? ' has-photo' : '' }}{{ $project['pic_photo'] && $project['pic_kedua_photo'] ? ' has-photo2' : '' }}"
                                          @if($project['color']) style="--project-color: {{ $project['color'] }}" @endif
                                          role="button" tabindex="0"
                                          data-project='@json($project)'
                                          data-company="{{ $project['company_id'] }}"
                                          data-pic="{{ $project['pic_id'] }}"
+                                         data-pic2="{{ $project['pic_kedua_id'] }}"
                                          data-status="{{ $project['status'] }}">
                                         {{-- Foto PIC besar sebagai latar di sisi kanan kartu (dekoratif; nama PIC sudah tertulis) --}}
+                                        @if($project['pic_photo'] && $project['pic_kedua_photo'])
+                                            {{-- PIC kedua: di belakang PIC utama, bagian tepinya tetap terlihat --}}
+                                            <img src="{{ asset('storage/' . $project['pic_kedua_photo']) }}" alt="" class="sgg-card-bgphoto sgg-card-bgphoto--second" aria-hidden="true" loading="lazy">
+                                        @endif
                                         @if($project['pic_photo'])
                                             <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-card-bgphoto" aria-hidden="true" loading="lazy">
                                         @elseif($project['pic_name'])
@@ -117,7 +122,7 @@
                                         @endif
                                         {{-- Keterangan PIC: desktop di bawah foto kolom kiri, mobile di bawah avatar kanan atas --}}
                                         @if($project['pic_name'])
-                                            <span class="sgg-card-piccap" aria-hidden="true"><b>PIC</b><span>{{ $project['pic_name'] }}</span></span>
+                                            <span class="sgg-card-piccap" aria-hidden="true"><b>PIC</b><span>{{ $project['pic_name'] }}</span>@if($project['pic_kedua_name'])<span class="sgg-card-piccap-2">{{ $project['pic_kedua_name'] }}</span>@endif</span>
                                         @endif
                                         {{-- 1. Logo, perusahaan, dan nama project --}}
                                         <div class="sgg-card-info">
@@ -161,14 +166,22 @@
                                             <span class="sgg-badge {{ $statusClass }}"><span class="sgg-badge-dot"></span>{{ $statusLabel }}</span>
                                             {{-- Mobile: hanya avatar PIC di samping status; nama ada di tooltip dan untuk pembaca layar --}}
                                             @if($project['pic_name'])
-                                                <span class="sgg-card-picinline" title="PIC: {{ $project['pic_name'] }}">
+                                                <span class="sgg-card-picinline" title="PIC: {{ $project['pic_name'] }}{{ $project['pic_kedua_name'] ? ', ' . $project['pic_kedua_name'] : '' }}">
                                                     <span class="sgg-card-picsep" aria-hidden="true">|</span>
+                                                    {{-- PIC kedua digambar lebih dulu (di belakang), PIC utama menumpuk di atasnya --}}
+                                                    @if($project['pic_kedua_name'])
+                                                        @if($project['pic_kedua_photo'])
+                                                            <img src="{{ asset('storage/' . $project['pic_kedua_photo']) }}" alt="" class="sgg-card-picavatar sgg-card-picavatar--second" loading="lazy">
+                                                        @else
+                                                            <span class="sgg-card-picavatar sgg-card-picavatar--second sgg-card-picavatar--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_kedua_name'], 0, 1)) }}</span>
+                                                        @endif
+                                                    @endif
                                                     @if($project['pic_photo'])
                                                         <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-card-picavatar" loading="lazy">
                                                     @else
                                                         <span class="sgg-card-picavatar sgg-card-picavatar--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_name'], 0, 1)) }}</span>
                                                     @endif
-                                                    <span class="sgg-card-picname">{{ $project['pic_name'] }}</span>
+                                                    <span class="sgg-card-picname">{{ $project['pic_name'] }}{{ $project['pic_kedua_name'] ? ', ' . $project['pic_kedua_name'] : '' }}</span>
                                                 </span>
                                             @endif
                                         </div>
@@ -275,7 +288,7 @@
                                 <div class="sgg-team-role">{{ collect([$pic->jabatan, $pic->divisi])->filter()->implode(', ') }}</div>
                             @endif
                         </div>
-                        <span class="sgg-badge sgg-badge--completed">{{ $pic->projects_count }} project</span>
+                        <span class="sgg-badge sgg-badge--completed">{{ $pic->projects_count + $pic->projects_kedua_count }} project</span>
                     </div>
                 @empty
                     <p class="sgg-modal-empty">Belum ada PIC yang terdaftar.</p>
