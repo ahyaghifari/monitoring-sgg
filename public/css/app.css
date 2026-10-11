@@ -1,358 +1,627 @@
-/* Reset dasar dan font global Nunito */
+/* ==========================================================================
+   SGG Monitoring: tema terang, futuristik-maksimalis.
+   Hijau SGG = struktur & progress, pink = sorotan & live.
+   Shape lock: frame 24px, kartu 16px, input 10px, chip/badge pill.
+   Efek scroll memakai CSS scroll-driven animation; tanpa dukungan browser
+   semua elemen tampil statis.
+   ========================================================================== */
+@property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+:root {
+    --bg: #eefaf3;
+    --surface: #ffffff;
+    --surface-2: #e0f5e9;
+    --line: rgba(0, 90, 45, .14);
+    --line-2: rgba(0, 90, 45, .28);
+    --navy: #042c6c;
+    --ink: #042c6c;
+    --paper: #ffffff;
+    --bezel-a: #ffffff;
+    --bezel-b: #d4f1e1;
+    --screen-bg: #fbfffc;
+    --bar: #008A45;
+    --badge-low: #eef2ef;
+    --badge-medium: #cfe4ff;
+    --badge-high: #ffe8a3;
+    --badge-urgent: #ffb8b8;
+    --text: #042c6c;
+    --muted: #4a6a5a;
+    --green: #008A45;
+    --green-hi: #00c26a;
+    --green-soft: #c9f0da;
+    --blue: #2f6bdb;
+    --blue-soft: #dbe7fb;
+    --pink: #d41f75;
+    --pink-hi: #ff4fa3;
+    --pink-soft: #ffd1e6;
+    --r-frame: 24px;
+    --r-card: 16px;
+    --r-in: 10px;
+    --font: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }
 body {
-    font-family: 'Nunito', sans-serif;
-    background-color: #F8FAFC;
-    min-height: 100vh;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Header putih dengan garis gradien hijau-magenta */
-.sgg-header {
-    background: #ffffff;
-    box-shadow: 0 1px 2px rgba(0,0,0,.05);
-    position: sticky; top: 0; z-index: 40;
+/* ---------- Latar belakang ---------- */
+.tech-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.tech-bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 138, 69, .10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 138, 69, .10) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
 }
-.sgg-header::after {
-    content: ''; display: block; height: 4px;
-    background: linear-gradient(90deg, #008A45 0%, #D946EF 50%, #008A45 100%);
+/* Lantai grid berperspektif di dasar layar */
+.tech-bg-floor {
+    position: absolute; left: -25%; right: -25%; bottom: -10%; height: 55%;
+    background-image:
+        linear-gradient(rgba(0, 138, 69, .30) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 138, 69, .30) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: perspective(520px) rotateX(62deg);
+    transform-origin: 50% 100%;
+    mask-image: linear-gradient(0deg, #000 0%, transparent 85%);
+    -webkit-mask-image: linear-gradient(0deg, #000 0%, transparent 85%);
 }
-.sgg-header-inner {
-    max-width: 1280px; margin: 0 auto; padding: 12px 1.25rem;
-    display: flex; align-items: center; gap: 12px;
-}
-/* Logo SGG di header */
-.sgg-logo-img { height: 44px; width: auto; flex-shrink: 0; display: block; }
-.sgg-logo-text { display: flex; flex-direction: column; line-height: 1.2; }
-.sgg-logo-text .brand { font-weight: 700; font-size: 17px; color: #111827; letter-spacing: -0.3px; }
-.sgg-logo-text .sub   { font-weight: 500; font-size: 12px; color: #6b7280; letter-spacing: 0.2px; }
+.tech-glow { position: absolute; border-radius: 50%; filter: blur(80px); }
+.tech-glow--green { width: 680px; height: 680px; top: -160px; left: -160px; background: rgba(0, 194, 106, .42); }
+.tech-glow--pink  { width: 460px; height: 460px; top: 120px; right: -140px; background: rgba(255, 79, 163, .26); }
+.tech-glow--mint  { width: 460px; height: 460px; bottom: 6%; left: 30%; background: rgba(47, 107, 219, .22); }
 
-/* Kontainer utama dan judul halaman */
-.sgg-main {
-    position: relative; z-index: 1;
-    max-width: 1280px; margin: 0 auto; padding: 20px 16px 40px;
+/* ---------- Logo & status live (di title bar layar) ---------- */
+.sgg-logo-img { height: 34px; width: auto; flex-shrink: 0; display: none; /* disembunyikan sementara: ganti ke block */ }
+.sgg-logo-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.sgg-logo-text .brand { font-weight: 800; font-size: 16px; color: #fff; letter-spacing: -0.2px; }
+.sgg-logo-text .sub   { font-weight: 500; font-size: 12px; color: #d3f5e2; }
+.sgg-live {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--navy);
+    background: var(--pink-hi); border: 2px solid var(--ink); border-radius: 9999px; padding: 4px 12px;
+    box-shadow: 3px 3px 0 var(--ink);
 }
-@media (min-width: 768px) { .sgg-main { padding: 28px 24px 48px; } }
-.sgg-page-header { margin-bottom: 28px; }
-.sgg-page-title { color: #111827; font-size: 26px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
-.sgg-page-subtitle { color: #6b7280; font-size: 14px; font-weight: 500; }
+.sgg-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
 
-/* Daftar kartu project: 1 kolom (1 baris 1 project) di semua ukuran layar */
-.sgg-project-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.4rem; /* gap-y-1.5 / 6.4px */
-    row-gap: 0.4rem;
+/* ---------- Panggung: monitor langsung di atas ---------- */
+.sgg-main { position: relative; z-index: 1; height: 100dvh; padding: 12px; }
+@media (min-width: 768px) { .sgg-main { padding: 16px; } }
+
+.sgg-stage { height: 100%; }
+
+/* ---------- Tab ringkasan di dalam layar ---------- */
+.sgg-tabs { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 16px 0; position: relative; z-index: 4; }
+@media (min-width: 768px) { .sgg-tabs { gap: 12px; padding: 16px 22px 0; } }
+.sgg-tab {
+    display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px;
+    font: 700 14px var(--font); color: var(--ink); background: var(--paper);
+    border: 2px solid var(--ink); border-radius: var(--r-card); box-shadow: 4px 4px 0 var(--green);
+    cursor: pointer; transition: translate .15s cubic-bezier(.16, 1, .3, 1), box-shadow .15s, background .15s;
 }
-@media (min-width: 768px) {
-    .sgg-project-list {
-        gap: 0.4rem; /* gap-y-1.5 / 6.4px */ 
-        row-gap: 0.4rem;
-    }
+button.sgg-tab:hover { translate: -2px -2px; box-shadow: 6px 6px 0 var(--ink); }
+button.sgg-tab:active { translate: 3px 3px; box-shadow: 1px 1px 0 var(--ink); }
+button.sgg-tab:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); translate: 3px 3px; box-shadow: 1px 1px 0 var(--ink); }
+.sgg-tab-count { font-family: var(--mono); font-size: 15px; font-weight: 700; padding: 0 8px; border-radius: 9999px; background: var(--navy); color: #fff; }
+.sgg-tab--stat { margin-left: auto; cursor: default; box-shadow: 4px 4px 0 var(--pink-hi); background: var(--navy); color: #fff; }
+.sgg-tab-count.is-pink { background: var(--pink-hi); color: var(--ink); }
+@media (max-width: 767px) { .sgg-tab--stat { margin-left: 0; } }
+
+/* ---------- Monitor ---------- */
+.sgg-monitor { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; timeline-scope: --screen; }
+.sgg-monitor-frame { align-self: stretch; }
+/* Bezel dengan tepi holografik berputar */
+.sgg-monitor-frame {
+    position: relative; flex: 1; min-height: 0; display: flex; padding: 14px; border-radius: var(--r-frame);
+    border: 4px solid transparent;
+    background:
+        linear-gradient(160deg, var(--bezel-a), var(--bezel-b)) padding-box,
+        conic-gradient(from var(--angle), var(--green), var(--green-hi), var(--ink), var(--green), var(--pink-hi), var(--green)) border-box;
+    box-shadow: 0 30px 70px -24px rgba(0, 138, 69, .55), 10px 10px 0 var(--green);
+}
+.sgg-hud { position: absolute; width: 26px; height: 26px; border: 3px solid var(--pink-hi); z-index: 4; }
+.sgg-hud--tl { left: 4px; top: 4px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px; }
+.sgg-hud--tr { right: 4px; top: 4px; border-left: 0; border-bottom: 0; border-top-right-radius: 8px; }
+.sgg-hud--bl { left: 4px; bottom: 4px; border-right: 0; border-top: 0; border-bottom-left-radius: 8px; }
+.sgg-hud--br { right: 4px; bottom: 4px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px; }
+
+.sgg-screen {
+    position: relative; overflow: hidden; flex: 1; min-width: 0; display: flex; flex-direction: column; border-radius: 12px;
+    background:
+        linear-gradient(rgba(0, 138, 69, .06) 1px, transparent 1px) 0 0 / 100% 28px,
+        var(--screen-bg);
+    border: 2px solid var(--ink);
+}
+/* Scanline halus di atas layar */
+.sgg-screen::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+    background: repeating-linear-gradient(0deg, rgba(0, 90, 45, .035) 0, rgba(0, 90, 45, .035) 1px, transparent 1px, transparent 4px);
+}
+/* Teks berjalan di atas layar */
+.sgg-marquee { flex-shrink: 0; overflow: hidden; background: var(--navy); border-bottom: 3px solid var(--green); }
+.sgg-marquee-track {
+    display: flex; align-items: center; gap: 22px; width: max-content; padding: 7px 0;
+    font-size: 13px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: #fff;
+}
+.sgg-marquee-track span:nth-of-type(even) { color: var(--green-hi); }
+.sgg-marquee-track i {
+    width: 14px; height: 14px; flex-shrink: 0; background: var(--pink-hi);
+    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
 }
 
-/* Kartu vertikal: info, isi, badge, progress */
-.sgg-project-card {
-    display: flex; flex-direction: column; gap: 14px; min-width: 0; width: 100%;
-    margin-top: 1.5rem; /* my-6 */
-    margin-bottom: 2rem; /* mb-8 */
-    background: rgba(255, 255, 255, 0.90); /* Glass effect ringan bg-white/90 */
-    backdrop-filter: blur(4px); /* backdrop-blur-sm */
-    -webkit-backdrop-filter: blur(4px);
-    border-radius: 16px; padding: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-    border: 1px solid rgba(238, 242, 240, 0.85); border-top: 4px solid #008A45;
-    cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
-    animation: fadeSlideUp .4s ease backwards; animation-delay: var(--delay, 0ms); /* --delay diisi per kartu dari Blade */
-}
-@media (min-width: 768px) { .sgg-project-card { padding: 20px; } }
-.dark .sgg-project-card,
-:root[class~="dark"] .sgg-project-card {
-    background: rgba(17, 24, 39, 0.90);
-    border-color: rgba(55, 65, 81, 0.7);
-    border-top-color: #008A45;
-}
-.sgg-project-card:hover {
-    border-top-color: #D946EF;
-    background: rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 12px 32px rgba(0,0,0,.06);
-}
-.dark .sgg-project-card:hover,
-:root[class~="dark"] .sgg-project-card:hover {
-    background: rgba(17, 24, 39, 0.95);
-}
-.sgg-project-card:focus-visible { outline: 3px solid rgba(0,138,69,.35); outline-offset: 2px; }
-.sgg-project-card[hidden] { display: none; }
-.is-refreshed .sgg-project-card { animation: none; } /* Tanpa animasi saat auto refresh */
-@keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+/* Stand monitor */
+.sgg-monitor-neck { flex-shrink: 0; width: 84px; height: 28px; background: repeating-linear-gradient(90deg, #005c2e 0 6px, var(--green) 6px 12px); border-inline: 3px solid var(--ink); }
+.sgg-monitor-base {
+    flex-shrink: 0; width: min(300px, 55%); height: 16px; border-radius: 9999px;
+    background: linear-gradient(90deg, var(--green), var(--green-hi) 70%, var(--pink-hi)); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
 }
 
-/* Logo, perusahaan, dan nama project */
-.sgg-card-info { min-width: 0; display: flex; align-items: center; gap: 12px; }
-.sgg-card-text { flex: 1; min-width: 0; }
-.sgg-card-logo {
-    width: 52px; height: 52px; flex-shrink: 0;
-    border-radius: 50%; object-fit: cover;
-    border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+.sgg-screen-bar {
+    position: relative; display: flex; align-items: center; gap: 14px;
+    padding: 10px 16px; border-bottom: 4px solid var(--ink); background: var(--bar);
+    font-family: var(--mono); font-size: 12px; font-weight: 600; color: #fff;
 }
-.sgg-card-company {
-    font-size: 12px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.6px; color: #008A45; margin-bottom: 2px;
-}
-/* Nama project: 20px HP, 25px desktop */
-.sgg-card-title { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1.3; letter-spacing: -0.2px; }
-@media (min-width: 768px) { .sgg-card-title { font-size: 25px; } }
+/* Tiga lingkaran di title bar (desktop) */
+.sgg-screen-dots { display: inline-flex; gap: 6px; }
+.sgg-screen-dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--paper); border: 2px solid #fff; }
+.sgg-screen-dots i:nth-child(1) { background: var(--pink-hi); }
+.sgg-screen-dots i:nth-child(2) { background: var(--green-hi); }
 
-/* Isi kartu tumbuh agar badge & progress sejajar di bawah */
-.sgg-card-body { flex: 1; }
-/* Deskripsi: 12px, maksimal 3 baris */
-.sgg-card-desc {
-    font-size: 12px; line-height: 1.625; color: #64748b; font-weight: 400;
-    display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+/* Tiga lingkaran di bar bawah layar (hanya mobile): dekoratif, bukan tombol */
+.sgg-bar-dots { margin-left: auto; display: none; align-items: center; gap: 6px; flex-shrink: 0; pointer-events: none; user-select: none; cursor: default; }
+.sgg-bar-dots i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
+.sgg-bar-dots i:nth-child(1) { background: var(--pink-hi); }
+.sgg-bar-dots i:nth-child(2) { background: var(--green-hi); }
+.sgg-bar-dots i:nth-child(3) { background: #fff; }
+.sgg-screen-progress {
+    position: absolute; left: 0; right: 0; bottom: -2px; height: 4px;
+    background: linear-gradient(90deg, var(--green), var(--green-hi), var(--pink-hi));
+    transform-origin: left; transform: scaleX(0);
 }
-/* PIC & Pemohon: 12px HP, 14px desktop, melipat jika panjang */
-.sgg-card-meta {
-    font-size: 14px; font-weight: 600; color: #334155; line-height: 1.5; margin-top: 8px;
-    display: flex; flex-wrap: wrap; gap: 2px 6px;
-}
-@media (min-width: 768px) { .sgg-card-meta { font-size: 16px; } }
-.sgg-card-meta strong { font-weight: 800; color: #1e293b; }
-.sgg-card-meta-sep { color: #cbd5e1; }
 
-/* Filter: vertikal rapat di HP, sejajar horizontal di desktop */
-.sgg-filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-@media (min-width: 768px) { .sgg-filters { flex-direction: row; gap: 12px; } }
-.sgg-filter { display: flex; flex-direction: column; gap: 4px; }
-@media (min-width: 768px) { .sgg-filter { width: 260px; } }
-.sgg-filter span { font-size: 12px; font-weight: 700; color: #475569; }
+/* Area scroll di dalam layar */
+.sgg-screen-scroll {
+    flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+    padding: 18px; scroll-timeline: --screen block;
+    scrollbar-width: thin; scrollbar-color: var(--pink) transparent;
+}
+.sgg-screen-scroll::-webkit-scrollbar { width: 8px; }
+.sgg-screen-scroll::-webkit-scrollbar-thumb { background: var(--pink-hi); border: 2px solid var(--ink); border-radius: 9999px; }
+@media (min-width: 768px) { .sgg-screen-scroll { padding: 22px; } }
+
+/* ---------- Filter ---------- */
+.sgg-filters {
+    flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 10px 16px;
+    border-top: 4px solid var(--ink); background: var(--bar); position: relative; z-index: 4;
+}
+.sgg-filter { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; max-width: 340px; }
+.sgg-filter span { font-family: var(--mono); font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; }
 .sgg-filter select {
-    width: 100%; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600; color: #1e293b;
-    padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; cursor: pointer;
+    flex: 1; min-width: 0; padding: 6px 10px; border-radius: var(--r-in);
+    background: var(--paper); color: var(--ink); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+    font: 600 13px var(--font);
 }
-.sgg-filter select:focus { outline: none; border-color: #008A45; box-shadow: 0 0 0 3px rgba(0,138,69,.15); }
-.sgg-filter-empty { text-align: center; padding: 40px 20px; color: #6b7280; font-size: 14px; font-weight: 500; }
+/* Mobile: Perusahaan dan PIC berdampingan, label di atas dropdown */
+@media (max-width: 767px) {
+    .sgg-filters { flex-wrap: nowrap; gap: 8px; padding: 8px 10px; }
+    .sgg-filter { flex: 1 1 0; min-width: 0; max-width: none; flex-direction: column; align-items: stretch; gap: 3px; }
+    .sgg-filter span { font-size: 10px; }
+    .sgg-filter select { width: 100%; padding: 4px 6px; font-size: 12px; box-shadow: 2px 2px 0 var(--ink); text-overflow: ellipsis; }
+}
+.sgg-filter select:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+.sgg-filter-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 15px; font-weight: 500; }
 
-/* Badge urgensi dan status */
+/* ---------- Kartu project ---------- */
+.sgg-project-list { display: grid; grid-template-columns: 1fr; gap: 14px; padding-right: 6px; }
+.sgg-project-card {
+    position: relative; display: grid; grid-template-columns: 1fr; gap: 10px 24px; min-width: 0;
+    padding: 14px 16px; border-radius: var(--r-card); cursor: pointer;
+    background: var(--paper); border: 2px solid var(--ink); border-left: 8px solid var(--green); box-shadow: 4px 4px 0 var(--green);
+    transition: translate .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s cubic-bezier(.16, 1, .3, 1);
+}
+.sgg-project-card:nth-child(3n+2) { box-shadow: 4px 4px 0 var(--ink); }
+.sgg-project-card:nth-child(3n) { box-shadow: 4px 4px 0 var(--pink-hi); }
+.sgg-project-card:hover { translate: -2px -2px; box-shadow: 6px 6px 0 var(--ink); }
+.sgg-project-card:active { translate: 3px 3px; box-shadow: 2px 2px 0 var(--ink); }
+.sgg-project-card:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 3px; }
+.sgg-project-card[hidden] { display: none; }
+
+@media (min-width: 900px) {
+    .sgg-project-card { grid-template-columns: minmax(0, 1fr) 240px; padding: 12px 16px; }
+    .sgg-card-info   { grid-column: 1; grid-row: 1; }
+    .sgg-card-body   { grid-column: 1; grid-row: 2; }
+    .sgg-card-badges { grid-column: 2; grid-row: 1; justify-content: flex-end; align-self: start; }
+    .sgg-card-progress { grid-column: 2; grid-row: 2; align-self: end; }
+}
+
+.sgg-card-info { min-width: 0; display: flex; align-items: center; gap: 14px; }
+.sgg-card-text { flex: 1; min-width: 0; }
+.sgg-card-logo { height: 44px; width: auto; max-width: 120px; padding: 3px; border-radius: var(--r-in); object-fit: contain; flex-shrink: 0; border: 2px solid var(--ink); background: var(--paper); }
+.sgg-card-company {
+    display: inline-block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink); background: var(--green-soft); padding: 1px 8px; border-radius: 6px; margin-bottom: 4px;
+}
+.sgg-card-title { font-size: 18px; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; color: var(--ink); }
+@media (min-width: 768px) { .sgg-card-title { font-size: 20px; } }
+
+.sgg-card-body { display: flex; flex-direction: column; gap: 6px; }
+.sgg-card-desc { font-size: 14px; line-height: 1.45; color: var(--muted); font-weight: 500; max-width: 80ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sgg-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; font-size: 13px; font-weight: 600; color: var(--ink); }
+/* PIC dan Peminta memakai struktur sama agar label dan nama sejajar */
+.sgg-card-meta > span { display: inline-flex; align-items: center; gap: 6px; min-height: 26px; line-height: 1.2; }
+.sgg-card-meta > span > strong { margin-right: 0; }
+.sgg-card-meta strong, .sgg-card-note strong { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--pink); margin-right: 6px; }
+.sgg-pic { display: inline-flex; align-items: center; gap: 6px; }
+.sgg-pic-photo {
+    width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+    border: 2px solid var(--ink); background: var(--green-soft);
+}
+.sgg-pic-photo--initial { display: inline-flex; align-items: center; justify-content: center; font: 700 12px var(--font); color: var(--ink); }
+.sgg-card-meta .sgg-pic strong { margin-right: 0; }
+.sgg-card-note { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+/* ---------- Badge ---------- */
 .sgg-card-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .sgg-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 12px; border-radius: 9999px;
-    font-size: 12px; font-weight: 600; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px;
+    font-size: 12px; font-weight: 700; white-space: nowrap; border: 2px solid var(--ink); color: var(--ink);
 }
-.sgg-badge-dot { width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; }
-.sgg-badge--low       { background: #f3f4f6; color: #6b7280; }
-.sgg-badge--low .sgg-badge-dot       { background: #9ca3af; }
-.sgg-badge--medium    { background: #dbeafe; color: #2563eb; }
-.sgg-badge--medium .sgg-badge-dot    { background: #3b82f6; }
-.sgg-badge--high      { background: #fef3c7; color: #d97706; }
-.sgg-badge--high .sgg-badge-dot      { background: #f59e0b; }
-.sgg-badge--urgent    { background: #fee2e2; color: #dc2626; }
-.sgg-badge--urgent .sgg-badge-dot    { background: #ef4444; }
-.sgg-badge--progress  { background: #fff7ed; color: #ea580c; }
-.sgg-badge--progress .sgg-badge-dot  { background: #f97316; }
-.sgg-badge--completed { background: #f0fdf4; color: #15803d; }
-.sgg-badge--completed .sgg-badge-dot { background: #22c55e; }
+.sgg-badge-dot { width: 7px; height: 7px; border-radius: 9999px; flex-shrink: 0; background: var(--ink); }
+.sgg-badge--low       { background: var(--badge-low); }
+.sgg-badge--medium    { background: var(--badge-medium); }
+.sgg-badge--high      { background: var(--badge-high); }
+.sgg-badge--urgent    { background: var(--badge-urgent); }
+.sgg-badge--progress  { background: var(--pink-soft); }
+.sgg-badge--completed { background: var(--green-soft); }
 
-/* Progress bar dengan efek kilau */
+/* ---------- Progress ---------- */
 .sgg-card-progress { display: flex; align-items: center; gap: 12px; }
-.sgg-progress-track { flex: 1; height: 10px; background: #f3f4f6; border-radius: 9999px; overflow: hidden; }
+.sgg-progress-track { flex: 1; height: 14px; background: var(--paper); border: 2px solid var(--ink); border-radius: 9999px; overflow: hidden; }
 .sgg-progress-fill {
-    height: 100%; border-radius: 9999px; position: relative; width: var(--percent, 0%); /* --percent diisi dari Blade/JS */
-    background: linear-gradient(90deg, #008A45, #00B35B);
-    transition: width .7s ease-in-out; /* Batang meluncur halus saat progress berubah */
+    height: 100%; position: relative; width: var(--percent, 0%);
+    background: linear-gradient(90deg, var(--green), var(--green-hi) 75%, var(--pink-hi));
+    transition: width .7s ease-in-out;
 }
 .sgg-progress-fill::after {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
-    animation: shimmer 2s infinite;
+    background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .28) 0 6px, transparent 6px 12px);
+    animation: stripes 1.2s linear infinite;
 }
-@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-.sgg-progress-text { font-size: 13px; font-weight: 700; color: #D946EF; min-width: 42px; text-align: right; }
+@keyframes stripes { to { background-position: 17px 0; } }
+.sgg-progress-text { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--pink); min-width: 48px; text-align: right; }
 
-/* Modal detail project (read-only) */
+/* ---------- Modal detail ---------- */
 .sgg-modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.5);
-    backdrop-filter: blur(4px); z-index: 50;
+    position: fixed; inset: 0; background: rgba(4, 44, 108, .6);
+    backdrop-filter: blur(6px); z-index: 50;
     display: flex; align-items: center; justify-content: center;
     padding: 16px; opacity: 0; visibility: hidden;
     transition: opacity .25s ease, visibility .25s ease;
 }
 .sgg-modal-overlay.active { opacity: 1; visibility: visible; }
 .sgg-modal {
-    background: #ffffff; border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.2);
-    width: 100%; max-width: 640px; max-height: 88vh;
+    background: var(--paper); border: 3px solid var(--ink); border-radius: var(--r-frame);
+    box-shadow: 10px 10px 0 var(--ink);
+    width: 100%; max-width: 640px; max-height: 88dvh;
     display: flex; flex-direction: column; overflow: hidden;
-    transform: translateY(20px) scale(.97); transition: transform .25s ease;
+    transform: translateY(20px) scale(.97); transition: transform .25s cubic-bezier(.16, 1, .3, 1);
 }
 .sgg-modal-overlay.active .sgg-modal { transform: translateY(0) scale(1); }
 .sgg-modal-header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    padding: 24px 24px 16px; border-bottom: 1px solid #f3f4f6; gap: 12px;
+    padding: 24px 24px 16px; border-bottom: 2px solid var(--ink); gap: 12px; background: var(--bar);
 }
 .sgg-modal-header-info { flex: 1; }
-.sgg-modal-company {
-    font-size: 12px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.6px; color: #D946EF; margin-bottom: 4px;
-}
-.sgg-modal-title { font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3; margin-bottom: 12px; }
+.sgg-modal-company { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--pink-soft); margin-bottom: 4px; }
+.sgg-modal-title { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 12px; color: #fff; }
 .sgg-modal-badges { display: flex; gap: 8px; flex-wrap: wrap; }
 .sgg-modal-close {
-    width: 36px; height: 36px; border-radius: 10px;
-    border: 1px solid #e5e7eb; background: #f9fafb; color: #6b7280;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .15s ease; flex-shrink: 0;
+    width: 38px; height: 38px; border-radius: var(--r-in); border: 2px solid var(--ink);
+    background: var(--paper); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background .2s, translate .15s, box-shadow .15s;
 }
-.sgg-modal-close:hover { background: #fee2e2; border-color: #fecaca; color: #dc2626; }
+.sgg-modal-close:hover { background: var(--pink-hi); }
+.sgg-modal-close:active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--ink); }
 .sgg-modal-close svg { width: 18px; height: 18px; }
 
-/* Progres di dalam modal */
-.sgg-modal-progress-section { padding: 16px 24px; background: #f9fafb; display: flex; align-items: center; gap: 14px; }
-.sgg-modal-progress-section .sgg-progress-track { height: 12px; }
-.sgg-modal-progress-label { font-size: 12px; font-weight: 600; color: #6b7280; white-space: nowrap; }
-.sgg-modal-progress-pct { font-size: 16px; font-weight: 800; color: #D946EF; min-width: 48px; text-align: right; }
+.sgg-modal-progress-section { padding: 16px 24px; border-bottom: 2px solid var(--ink); display: flex; align-items: center; gap: 14px; }
+.sgg-modal-progress-label { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.sgg-modal-progress-pct { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--pink); min-width: 52px; text-align: right; }
 
-/* Isi modal dan daftar tugas */
-.sgg-modal-body { flex: 1; overflow-y: auto; padding: 8px 24px 24px; }
-.sgg-modal-body-title {
-    font-size: 13px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.5px; color: #9ca3af; padding: 16px 0 10px;
-}
-.sgg-modal-body::-webkit-scrollbar { width: 6px; }
-.sgg-modal-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+.sgg-modal-body { flex: 1; overflow-y: auto; padding: 8px 24px 24px; scrollbar-width: thin; scrollbar-color: var(--pink-hi) transparent; }
+.sgg-modal-body-title { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); padding: 16px 0 10px; }
 
 .sgg-checklist-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px; border-radius: 12px;
-    border: 1px solid #f3f4f6; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;
+    border: 2px solid var(--ink); border-radius: var(--r-in); background: var(--paper);
 }
-.sgg-checklist-item.checked { background: #f0fdf4; border-color: #bbf7d0; }
+.sgg-checklist-item.checked { background: var(--green-soft); }
 .sgg-checklist-checkbox {
-    width: 24px; height: 24px; border-radius: 7px; flex-shrink: 0;
-    border: 2px solid #d1d5db; background: #fff;
+    width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink); background: var(--paper); flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
 }
-.sgg-checklist-item.checked .sgg-checklist-checkbox { background: #008A45; border-color: #008A45; }
+.sgg-checklist-item.checked .sgg-checklist-checkbox { background: var(--green); }
 .sgg-checklist-checkbox svg { width: 14px; height: 14px; color: #fff; opacity: 0; }
 .sgg-checklist-item.checked .sgg-checklist-checkbox svg { opacity: 1; }
-.sgg-checklist-label { font-size: 15px; font-weight: 500; color: #374151; flex: 1; min-width: 0; word-break: break-word; }
-.sgg-checklist-item.checked .sgg-checklist-label { text-decoration: line-through; color: #9ca3af; }
-.sgg-checklist-state { font-size: 12px; font-weight: 600; color: #9ca3af; white-space: nowrap; }
-.sgg-checklist-item.checked .sgg-checklist-state { color: #15803d; }
+.sgg-checklist-label { font-size: 15px; font-weight: 600; color: var(--ink); flex: 1; min-width: 0; word-break: break-word; }
+.sgg-checklist-item.checked .sgg-checklist-label { text-decoration: line-through; color: var(--muted); }
+.sgg-checklist-state { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.sgg-checklist-item.checked .sgg-checklist-state { color: var(--green); }
+.sgg-modal-empty { color: var(--muted); font-size: 14px; padding: 8px 0; }
 
-.sgg-modal-empty { color: #9ca3af; font-size: 14px; padding: 8px 0; }
-
-/* Footer modal */
-.sgg-modal-footer { padding: 16px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; }
+.sgg-modal-footer { padding: 16px 24px; border-top: 2px solid var(--ink); display: flex; justify-content: flex-end; }
 .sgg-modal-close-btn {
-    padding: 10px 24px; border-radius: 10px; background: #f3f4f6;
-    border: 1px solid #e5e7eb; font-size: 14px; font-weight: 600;
-    color: #374151; cursor: pointer; transition: background .15s ease;
+    padding: 10px 24px; border-radius: 9999px; border: 2px solid var(--ink);
+    background: var(--green-hi); color: var(--navy); font: 800 14px var(--font); cursor: pointer;
+    box-shadow: 4px 4px 0 var(--ink); transition: translate .15s, box-shadow .15s;
 }
-.sgg-modal-close-btn:hover { background: #e5e7eb; }
+.sgg-modal-close-btn:hover { background: var(--pink-hi); }
+.sgg-modal-close-btn:active { translate: 3px 3px; box-shadow: 1px 1px 0 var(--ink); }
 
-/* Tampilan saat belum ada project */
-.sgg-empty { text-align: center; padding: 60px 20px; color: #6b7280; }
-.sgg-empty-icon {
-    width: 64px; height: 64px; margin: 0 auto 16px;
-    background: rgba(0,138,69,.10); border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-}
-.sgg-empty-icon svg { width: 32px; height: 32px; color: #008A45; }
-.sgg-empty h3 { font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 6px; }
-.sgg-empty p  { font-size: 14px; font-weight: 500; }
+/* ---------- Kosong ---------- */
+.sgg-empty { text-align: center; padding: 72px 20px; color: var(--muted); }
+.sgg-empty h3 { font-size: 22px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+.sgg-empty p { font-size: 14px; font-weight: 500; }
 
-/* ==========================================================================
-   Latar belakang IT (komponen x-tech-background)
-   Di-scope ke .monitoring-page-wrapper: hanya aktif di halaman monitoring, tidak menyentuh Filament Admin
-   ========================================================================== */
-.monitoring-page-wrapper .tech-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 
-/* 1. Tech Grid & Dot Matrix */
-.monitoring-page-wrapper .tech-bg-grid {
-    position: absolute; inset: 0; background-size: 38px 38px;
-    background-image:
-        linear-gradient(to right, rgba(0, 138, 69, 0.045) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 138, 69, 0.045) 1px, transparent 1px);
-    mask-image: radial-gradient(circle at 50% 35%, black 45%, rgba(0, 0, 0, 0.3) 80%, transparent 100%);
-    -webkit-mask-image: radial-gradient(circle at 50% 35%, black 45%, rgba(0, 0, 0, 0.3) 80%, transparent 100%);
+/* ---------- Mode gelap: ikut sistem, bisa diganti lewat tombol (data-theme) ---------- */
+:root[data-theme="dark"] {
+    --bg: #06130c;
+    --surface: #0d1d14;
+    --surface-2: #12281c;
+    --line: rgba(255, 255, 255, .12);
+    --line-2: rgba(255, 255, 255, .26);
+    --ink: #dcebe3;
+    --text: #e6f2ec;
+    --muted: #9db8a9;
+    --green-soft: #0f3a25;
+    --pink-soft: #46163a;
+    --blue-soft: #14284f;
+    --paper: #0f2218;
+    --bezel-a: #12281c;
+    --bezel-b: #0a1a12;
+    --screen-bg: #08170f;
+    --bar: #00592d;
+    --badge-low: #22302a;
+    --badge-medium: #17306b;
+    --badge-high: #4a3a0b;
+    --badge-urgent: #5a1f24;
 }
-.monitoring-page-wrapper .tech-bg-dots {
-    position: absolute; inset: 0; background-size: 38px 38px; background-position: -1px -1px; opacity: 0.85;
-    background-image: radial-gradient(circle, rgba(16, 185, 129, 0.12) 1.2px, transparent 1.2px);
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #06130c;
+        --surface: #0d1d14;
+        --surface-2: #12281c;
+        --line: rgba(255, 255, 255, .12);
+        --line-2: rgba(255, 255, 255, .26);
+        --ink: #dcebe3;
+        --text: #e6f2ec;
+        --muted: #9db8a9;
+        --green-soft: #0f3a25;
+        --pink-soft: #46163a;
+        --blue-soft: #14284f;
+        --paper: #0f2218;
+        --bezel-a: #12281c;
+        --bezel-b: #0a1a12;
+        --screen-bg: #08170f;
+        --bar: #00592d;
+        --badge-low: #22302a;
+        --badge-medium: #17306b;
+        --badge-high: #4a3a0b;
+        --badge-urgent: #5a1f24;
+        }
+}
+:root[data-theme="dark"] .tech-glow { opacity: .55; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tech-glow { opacity: .55; } }
+:root[data-theme="dark"] .sgg-project-card:hover { box-shadow: 6px 6px 0 var(--green-hi); }
+
+/* Tombol ganti tema di title bar */
+.sgg-theme {
+    padding: 4px 12px; border-radius: 9999px; cursor: pointer;
+    font: 700 12px var(--mono); color: var(--ink); background: var(--paper);
+    border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);
+    transition: translate .15s, box-shadow .15s;
+}
+.sgg-theme:active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--ink); }
+.sgg-theme:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+.sgg-screen-bar .sgg-live { margin-left: auto; }
+.sgg-screen-bar .sgg-theme { margin-left: 0; }
+
+/* ---------- Modal daftar PIC ---------- */
+.sgg-team-item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px; margin-top: 10px;
+    border: 2px solid var(--ink); border-radius: var(--r-in); background: var(--paper);
+}
+.sgg-team-item:first-child { margin-top: 16px; }
+.sgg-team-photo {
+    width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+    border: 2px solid var(--ink); background: var(--green-soft);
+}
+.sgg-team-photo--initial { display: inline-flex; align-items: center; justify-content: center; font: 800 22px var(--font); color: var(--ink); }
+.sgg-team-text { flex: 1; min-width: 0; }
+.sgg-team-name { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.sgg-team-role { margin-top: 2px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.sgg-team-item .sgg-badge { flex-shrink: 0; }
+/* Modal tim dibuat lebih besar dari modal detail project */
+.sgg-modal--team { max-width: 880px; }
+.sgg-modal--team .sgg-modal-header { padding: 32px 36px 24px; }
+.sgg-modal--team .sgg-modal-company { font-size: 14px; }
+.sgg-modal--team .sgg-modal-title { font-size: 40px; margin-bottom: 0; }
+.sgg-modal--team .sgg-modal-close { width: 46px; height: 46px; }
+.sgg-modal--team .sgg-modal-close svg { width: 22px; height: 22px; }
+.sgg-modal--team .sgg-modal-body { padding: 8px 36px 32px; }
+.sgg-modal--team .sgg-team-item { gap: 24px; padding: 20px 24px; margin-top: 16px; box-shadow: 5px 5px 0 var(--green); }
+.sgg-modal--team .sgg-team-item:nth-child(even) { box-shadow: 5px 5px 0 var(--pink-hi); }
+.sgg-modal--team .sgg-team-photo { width: 104px; height: 104px; border-width: 3px; }
+.sgg-modal--team .sgg-team-photo--initial { font-size: 40px; }
+.sgg-modal--team .sgg-team-name { font-size: 26px; }
+.sgg-modal--team .sgg-team-role { margin-top: 4px; font-size: 17px; }
+.sgg-modal--team .sgg-badge { font-size: 14px; padding: 6px 16px; }
+.sgg-modal--team .sgg-modal-footer { padding: 20px 36px; }
+.sgg-modal--team .sgg-modal-close-btn { padding: 12px 32px; font-size: 16px; }
+.sgg-team-btn { background: var(--pink-hi); color: var(--navy); }
+.sgg-screen-bar .sgg-team-btn { margin-left: auto; }
+.sgg-screen-bar .sgg-team-btn + .sgg-theme, .sgg-screen-bar .sgg-live + .sgg-team-btn { margin-left: 0; }
+
+/* ---------- Tab diperkecil di desktop ---------- */
+@media (min-width: 768px) {
+    .sgg-tabs { gap: 8px; padding: 10px 22px 0; }
+    .sgg-tab { gap: 7px; padding: 4px 10px; font-size: 13px; border-radius: 10px; box-shadow: 3px 3px 0 var(--green); }
+    .sgg-tab--stat { box-shadow: 3px 3px 0 var(--pink-hi); }
+    button.sgg-tab:hover { box-shadow: 4px 4px 0 var(--ink); }
+    button.sgg-tab.is-active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--ink); }
+    .sgg-tab-count { font-size: 12px; padding: 0 7px; }
 }
 
-/* 2. Ambient Glow Neon */
-.monitoring-page-wrapper .tech-glow {
-    position: absolute; border-radius: 9999px; pointer-events: none;
-    will-change: transform, opacity; filter: blur(80px); -webkit-filter: blur(80px);
+/* ---------- Kelola tugas oleh PIC + form login ---------- */
+.sgg-checklist-checkbox--btn { cursor: pointer; padding: 0; transition: background .15s, scale .15s; }
+.sgg-checklist-checkbox--btn:hover { scale: 1.1; }
+.sgg-checklist-checkbox--btn:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+.sgg-checklist-item.checked .sgg-checklist-checkbox--btn { background: var(--green); }
+.sgg-task-del {
+    width: 30px; height: 30px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+    border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer;
+    transition: background .15s, translate .15s;
 }
-.monitoring-page-wrapper .tech-glow--emerald {
-    top: -8vw; left: -8vw; width: 38vw; height: 38vw; min-width: 320px; min-height: 320px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, rgba(0, 138, 69, 0.08) 50%, transparent 75%);
-    animation: techGlowPulse 10s ease-in-out infinite alternate;
+.sgg-task-del svg { width: 14px; height: 14px; }
+.sgg-task-del:hover { background: var(--pink-hi); color: var(--navy); }
+.sgg-task-del:active { translate: 1px 1px; }
+.sgg-task-del:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+#detail-checklist-container.is-busy { opacity: .55; pointer-events: none; }
+
+.sgg-task-add { margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--line-2); }
+.sgg-task-add-label, .sgg-field span { display: block; margin-bottom: 6px; font: 600 12px var(--mono); color: var(--muted); }
+.sgg-task-add-row { display: flex; gap: 10px; }
+.sgg-task-add input, .sgg-field input {
+    flex: 1; min-width: 0; width: 100%; padding: 10px 12px; border-radius: var(--r-in);
+    background: var(--paper); color: var(--ink); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--green);
+    font: 600 15px var(--font);
 }
-.monitoring-page-wrapper .tech-glow--teal {
-    top: -6vw; right: -8vw; width: 40vw; height: 40vw; min-width: 340px; min-height: 340px;
-    background: radial-gradient(circle, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.07) 50%, transparent 75%);
-    animation: techGlowPulse 13s ease-in-out infinite alternate-reverse;
+.sgg-task-add input:focus-visible, .sgg-field input:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+.sgg-task-add .sgg-modal-close-btn { flex-shrink: 0; }
+
+.sgg-form-body { padding: 20px 24px 8px; display: flex; flex-direction: column; gap: 14px; }
+.sgg-field { display: block; }
+.sgg-form-error {
+    margin-top: 12px; padding: 8px 12px; border: 2px solid var(--ink); border-radius: var(--r-in);
+    background: var(--badge-urgent); color: var(--ink); font-size: 13px; font-weight: 600;
 }
-.monitoring-page-wrapper .tech-glow--cyan {
-    bottom: -10vw; left: 25vw; width: 44vw; height: 36vw; min-width: 360px; min-height: 300px;
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(16, 185, 129, 0.05) 55%, transparent 75%);
-    animation: techGlowPulse 11s ease-in-out infinite alternate;
-}
-@keyframes techGlowPulse {
-    0% { transform: scale(0.96) translate(0, 0); opacity: 0.75; }
-    50% { transform: scale(1.05) translate(10px, -10px); opacity: 1; }
-    100% { transform: scale(0.98) translate(-5px, 8px); opacity: 0.85; }
+.sgg-form-body .sgg-form-error { margin-top: 0; }
+.sgg-modal--login { max-width: 440px; }
+.sgg-login-btn { background: var(--green-hi); color: var(--navy); }
+.sgg-modal-close-btn:disabled { opacity: .6; cursor: wait; }
+
+/* ---------- Mobile: tab dan kartu diperkecil ---------- */
+@media (max-width: 767px) {
+    .sgg-screen-bar { gap: 8px; padding: 8px 10px; }
+    .sgg-screen-dots { display: none; }
+    .sgg-bar-dots { display: inline-flex; }
+    .sgg-bar-dots i { width: 10px; height: 10px; }
+    .sgg-logo-text .brand { font-size: 13px; }
+    .sgg-logo-text .sub { font-size: 10px; }
+    .sgg-theme { padding: 2px 8px; font-size: 11px; box-shadow: 2px 2px 0 var(--ink); }
+    /* Pill Live jadi titik saja agar judul tetap muat */
+    .sgg-live { font-size: 0; gap: 0; padding: 6px; box-shadow: 2px 2px 0 var(--ink); }
+    .sgg-modal--team .sgg-modal-header { padding: 20px 20px 16px; }
+    .sgg-modal--team .sgg-modal-title { font-size: 30px; }
+    .sgg-modal--team .sgg-modal-body { padding: 4px 16px 20px; }
+    .sgg-modal--team .sgg-modal-footer { padding: 14px 16px; }
+    .sgg-modal--team .sgg-team-item { flex-wrap: wrap; gap: 14px; padding: 14px; }
+    .sgg-modal--team .sgg-team-photo { width: 72px; height: 72px; }
+    .sgg-modal--team .sgg-team-name { font-size: 20px; }
+    .sgg-modal--team .sgg-team-role { font-size: 14px; }
+    .sgg-modal--team .sgg-badge { font-size: 12px; padding: 3px 12px; }
+    .sgg-tabs { gap: 6px; padding: 8px 10px 0; }
+    .sgg-tab { gap: 6px; padding: 4px 8px; font-size: 12px; border-radius: 10px; box-shadow: 2px 2px 0 var(--green); }
+    .sgg-tab--stat { margin-left: 0; box-shadow: 2px 2px 0 var(--pink-hi); }
+    button.sgg-tab:hover { box-shadow: 3px 3px 0 var(--ink); }
+    button.sgg-tab.is-active { translate: 1px 1px; box-shadow: 1px 1px 0 var(--ink); }
+    .sgg-tab-count { font-size: 11px; padding: 0 6px; }
+
+    .sgg-screen-scroll { padding: 10px; }
+    .sgg-project-list { gap: 10px; padding-right: 2px; }
+    .sgg-project-card { gap: 8px; padding: 10px 12px; border-left-width: 6px; box-shadow: 3px 3px 0 var(--green); }
+    .sgg-project-card:nth-child(3n+2) { box-shadow: 3px 3px 0 var(--ink); }
+    .sgg-project-card:nth-child(3n) { box-shadow: 3px 3px 0 var(--pink-hi); }
+    .sgg-card-info { gap: 10px; }
+    .sgg-card-logo { height: 34px; max-width: 80px; padding: 2px; }
+    .sgg-card-company { font-size: 10px; padding: 1px 6px; margin-bottom: 3px; }
+    .sgg-card-title { font-size: 15px; }
+    .sgg-card-body { gap: 4px; }
+    .sgg-card-desc { font-size: 12px; line-height: 1.4; }
+    .sgg-card-meta { font-size: 12px; gap: 2px 14px; }
+    .sgg-card-meta strong, .sgg-card-note strong { font-size: 10px; margin-right: 4px; }
+    .sgg-card-note { font-size: 12px; }
+    .sgg-pic-photo { width: 20px; height: 20px; font-size: 10px; border-width: 1.5px; }
+    .sgg-badge { font-size: 10px; padding: 2px 8px; border-width: 1.5px; }
+    .sgg-progress-track { height: 10px; }
+    .sgg-progress-text { font-size: 12px; min-width: 36px; }
 }
 
-/* 3. Ikon IT mengapung */
-@keyframes floatIT {
-    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.08; }
-    50% { transform: translateY(-25px) rotate(3deg); opacity: 0.18; }
+/* ---------- Warna khusus per project (--project-color dari Admin Panel) ---------- */
+.sgg-project-card.has-color { border-left-color: var(--project-color); }
+.sgg-project-card.has-color:not(:hover) { box-shadow: 4px 4px 0 var(--project-color); }
+.sgg-project-card.has-color .sgg-card-company { background: color-mix(in srgb, var(--project-color) 22%, var(--paper)); }
+.sgg-project-card.has-color .sgg-progress-fill {
+    background: linear-gradient(90deg, var(--project-color), color-mix(in srgb, var(--project-color) 55%, #ffffff));
 }
-.monitoring-page-wrapper .animate-float-1 { animation: floatIT 6s ease-in-out infinite; }
-.monitoring-page-wrapper .animate-float-2 { animation: floatIT 8s ease-in-out infinite 2s; }
-.monitoring-page-wrapper .animate-float-3 { animation: floatIT 10s ease-in-out infinite 4s; }
-.monitoring-page-wrapper .tech-icons-layer { position: absolute; inset: 0; pointer-events: none; }
-.monitoring-page-wrapper .tech-float-icon { position: absolute; color: #047857; pointer-events: none; will-change: transform, opacity; }
-.monitoring-page-wrapper .tech-float-icon svg { display: block; width: 100%; height: 100%; will-change: transform, opacity; }
-.monitoring-page-wrapper .tech-icon-code     { top: 10%; left: 3.5%; width: 76px; height: 76px; }
-.monitoring-page-wrapper .tech-icon-cpu      { top: 14%; right: 4%; width: 82px; height: 82px; }
-.monitoring-page-wrapper .tech-icon-database { top: 52%; left: 2.8%; width: 70px; height: 70px; }
-.monitoring-page-wrapper .tech-icon-server   { top: 58%; right: 3.2%; width: 74px; height: 74px; }
-.monitoring-page-wrapper .tech-icon-terminal { bottom: 8%; right: 5%; width: 72px; height: 72px; }
+@media (max-width: 767px) {
+    .sgg-project-card.has-color:not(:hover) { box-shadow: 3px 3px 0 var(--project-color); }
+}
+/* Aksen warna project di atas header modal detail */
+.sgg-modal-header { border-top: 10px solid var(--project-color, transparent); }
 
-/* Mode gelap */
-:root[class~="dark"] .monitoring-page-wrapper .tech-bg-grid {
-    background-image:
-        linear-gradient(to right, rgba(16, 185, 129, 0.08) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(16, 185, 129, 0.08) 1px, transparent 1px);
-}
-:root[class~="dark"] .monitoring-page-wrapper .tech-bg-dots { background-image: radial-gradient(circle, rgba(52, 211, 153, 0.16) 1.2px, transparent 1.2px); }
-:root[class~="dark"] .monitoring-page-wrapper .tech-float-icon { color: #34d399; }
-:root[class~="dark"] .monitoring-page-wrapper .tech-glow--emerald { background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.10) 50%, transparent 75%); }
-:root[class~="dark"] .monitoring-page-wrapper .tech-glow--teal { background: radial-gradient(circle, rgba(20, 184, 166, 0.20) 0%, rgba(13, 148, 136, 0.09) 50%, transparent 75%); }
-:root[class~="dark"] .monitoring-page-wrapper .tech-glow--cyan { background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, rgba(16, 185, 129, 0.07) 55%, transparent 75%); }
+/* ---------- Motion (hanya bila diizinkan) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+    .sgg-caret { animation: blink 1.1s steps(2, start) infinite; }
+    @keyframes blink { to { visibility: hidden; } }
 
-/* Layar kecil */
-@media (max-width: 1024px) {
-    .monitoring-page-wrapper .tech-icon-code     { width: 56px; height: 56px; left: 2%; top: 8%; }
-    .monitoring-page-wrapper .tech-icon-cpu      { width: 60px; height: 60px; right: 2%; top: 12%; }
-    .monitoring-page-wrapper .tech-icon-database { width: 52px; height: 52px; left: 1.5%; top: 50%; }
-    .monitoring-page-wrapper .tech-icon-server   { width: 54px; height: 54px; right: 1.5%; top: 55%; }
-    .monitoring-page-wrapper .tech-icon-terminal { width: 52px; height: 52px; right: 3%; bottom: 6%; }
+    /* Gelombang loading: tiga titik memudar bergantian */
+    .sgg-bar-dots i { animation: dotWave 1.2s ease-in-out infinite; }
+    .sgg-bar-dots i:nth-child(2) { animation-delay: .2s; }
+    .sgg-bar-dots i:nth-child(3) { animation-delay: .4s; }
+    @keyframes dotWave { 0%, 100% { opacity: .25; scale: .8; } 50% { opacity: 1; scale: 1.1; } }
+
+    .sgg-live-dot { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .25; } }
+
+    .sgg-marquee-track { animation: marquee 40s linear infinite; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    .sgg-monitor-frame { animation: spin 7s linear infinite, intro .8s cubic-bezier(.16, 1, .3, 1) both; }
+    @keyframes intro { from { transform: translateY(40px) scale(.96); opacity: 0; } }
+    @keyframes spin { to { --angle: 360deg; } }
+
 }
-@media (max-width: 640px) {
-    .monitoring-page-wrapper .tech-icon-code     { width: 40px; height: 40px; left: 2%; top: 6%; }
-    .monitoring-page-wrapper .tech-icon-cpu      { width: 44px; height: 44px; right: 2%; top: 8%; }
-    .monitoring-page-wrapper .tech-icon-database { width: 38px; height: 38px; left: 2%; top: 50%; }
-    .monitoring-page-wrapper .tech-icon-server   { width: 38px; height: 38px; right: 2%; top: 56%; }
-    .monitoring-page-wrapper .tech-icon-terminal { width: 40px; height: 40px; right: 3%; bottom: 4%; }
+
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        /* Garis progress scroll di title bar layar */
+        .sgg-screen-progress { animation: grow linear both; animation-timeline: --screen; }
+        @keyframes grow { to { transform: scaleX(1); } }
+
+        /* Kartu masuk dengan miring + naik saat memasuki area scroll di dalam layar */
+        .sgg-project-card {
+            animation: cardIn linear both;
+            animation-timeline: view();
+            animation-range: entry 0% entry 100%;
+        }
+        @keyframes cardIn { from { opacity: .1; transform: translateY(40px) rotate(-1.5deg) scale(.94); } to { opacity: 1; transform: none; } }
+    }
 }
+
+::selection { background: var(--pink-hi); color: var(--navy); }

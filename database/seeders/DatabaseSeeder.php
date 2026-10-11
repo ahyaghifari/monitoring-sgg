@@ -23,6 +23,11 @@ class DatabaseSeeder extends Seeder
         );
 
         User::updateOrCreate(
+            ['email' => 'superadmin2@gmail.com'],
+            ['name' => 'Super Admin 2', 'password' => 'password', 'role' => UserRole::SUPER_ADMIN],
+        );
+
+        User::updateOrCreate(
             ['email' => 'staff@gmail.com'],
             ['name' => 'Staff', 'password' => 'password', 'role' => UserRole::ADMIN],
         );

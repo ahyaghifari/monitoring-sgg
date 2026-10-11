@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Ahya Ghifari">
+  <!-- Vector art Ahya Ghifari: gaya SGG (outline navy tebal, hijau + pink) -->
+  <defs>
+    <clipPath id="frame"><rect width="512" height="512"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)" stroke-linejoin="round" stroke-linecap="round">
+    <!-- latar -->
+    <rect width="512" height="512" fill="#008A45"/>
+    <g fill="#00c26a">
+      <path d="M0 360 L180 512 H0Z"/>
+      <path d="M512 0 V150 L360 0Z"/>
+    </g>
+    <circle cx="256" cy="206" r="188" fill="#c9f0da" stroke="#042c6c" stroke-width="8"/>
+    <circle cx="404" cy="104" r="46" fill="#ff4fa3" stroke="#042c6c" stroke-width="8"/>
+    <path d="M96 96 L108 128 L140 140 L108 152 L96 184 L84 152 L52 140 L84 128Z" fill="#ff4fa3" stroke="#042c6c" stroke-width="6"/>
+    <g fill="#ffffff" opacity=".9">
+      <rect x="436" y="300" width="14" height="14" rx="3" transform="rotate(45 443 307)"/>
+      <rect x="60" y="300" width="12" height="12" rx="3" transform="rotate(45 66 306)"/>
+      <rect x="470" y="380" width="10" height="10" rx="2" transform="rotate(45 475 385)"/>
+    </g>
+
+    <!-- badan: kemeja putih -->
+    <path d="M36 512 C36 420 108 372 190 360 L322 360 C404 372 476 420 476 512Z" fill="#ffffff" stroke="#042c6c" stroke-width="8"/>
+    <!-- lengan bersilang -->
+    <path d="M70 478 C160 428 352 428 442 478" fill="none" stroke="#042c6c" stroke-width="7"/>
+    <path d="M120 512 C190 462 322 462 392 512" fill="#e8f3ee" stroke="#042c6c" stroke-width="7"/>
+    <!-- leher -->
+    <path d="M216 300 H296 V366 C296 392 216 392 216 366Z" fill="#b9784c" stroke="#042c6c" stroke-width="8"/>
+    <!-- kerah -->
+    <path d="M196 356 L256 436 L232 470 L168 396Z" fill="#ffffff" stroke="#042c6c" stroke-width="7"/>
+    <path d="M316 356 L256 436 L280 470 L344 396Z" fill="#ffffff" stroke="#042c6c" stroke-width="7"/>
+    <path d="M256 436 V512" stroke="#042c6c" stroke-width="6"/>
+    <circle cx="256" cy="476" r="5" fill="#042c6c"/>
+
+    <!-- telinga -->
+    <circle cx="164" cy="226" r="20" fill="#d79b6b" stroke="#042c6c" stroke-width="7"/>
+    <circle cx="348" cy="226" r="20" fill="#d79b6b" stroke="#042c6c" stroke-width="7"/>
+    <!-- wajah -->
+    <path d="M170 190 C170 124 202 98 256 98 C310 98 342 124 342 190 V250 C342 314 300 352 256 352 C212 352 170 314 170 250Z" fill="#d79b6b" stroke="#042c6c" stroke-width="8"/>
+    <!-- rambut -->
+    <path d="M158 206 C142 110 190 62 256 62 C322 62 370 110 354 206 C344 166 318 142 256 142 C194 142 168 166 158 206Z" fill="#16213a" stroke="#042c6c" stroke-width="8"/>
+    <path d="M200 112 C226 90 270 88 300 106" fill="none" stroke="#2c3e66" stroke-width="6"/>
+
+    <!-- kacamata -->
+    <rect x="180" y="198" width="76" height="12" rx="5" fill="#16213a"/>
+    <rect x="256" y="198" width="76" height="12" rx="5" fill="#16213a"/>
+    <rect x="186" y="204" width="66" height="46" rx="9" fill="#ffffff" fill-opacity=".35" stroke="#16213a" stroke-width="7"/>
+    <rect x="260" y="204" width="66" height="46" rx="9" fill="#ffffff" fill-opacity=".35" stroke="#16213a" stroke-width="7"/>
+    <path d="M252 222 H260" stroke="#16213a" stroke-width="7"/>
+    <path d="M186 214 L170 212 M326 214 L342 212" stroke="#16213a" stroke-width="7"/>
+    <!-- mata -->
+    <circle cx="219" cy="228" r="6" fill="#042c6c"/>
+    <circle cx="293" cy="228" r="6" fill="#042c6c"/>
+    <!-- hidung & senyum -->
+    <path d="M256 240 C252 260 250 270 262 272" fill="none" stroke="#042c6c" stroke-width="6"/>
+    <path d="M230 298 Q256 312 282 298" fill="none" stroke="#042c6c" stroke-width="7"/>
+    <!-- pipi -->
+    <circle cx="198" cy="282" r="13" fill="#ff4fa3" opacity=".4"/>
+    <circle cx="314" cy="282" r="13" fill="#ff4fa3" opacity=".4"/>
+  </g>
+</svg>

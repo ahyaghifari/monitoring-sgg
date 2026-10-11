@@ -3,150 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Project — Syifa Global Group</title>
-    <meta name="description" content="Sistem Monitoring Project Syifa Global Group (SGG) — Pantau progress proyek secara real-time.">
+    <title>Monitoring Project | Syifa Global Group</title>
+    <meta name="description" content="Sistem Monitoring Project Syifa Global Group (SGG). Pantau progress proyek secara real-time.">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css'])
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
+    {{-- Terapkan tema tersimpan sebelum render agar tidak berkedip --}}
+    <script>try{var t=localStorage.getItem('sgg-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
-<body class="monitoring-page-wrapper">
-    {{-- Latar belakang modern bertema IT (Tech Grid, Ambient Glow, dan Floating Icons) --}}
+<body class="monitoring-page-wrapper" data-base="{{ url('/') }}">
+    {{-- Latar belakang: grid, lantai perspektif, glow hijau/pink (CSS di public/css/app.css) --}}
     <x-tech-background />
 
-    {{-- Header utama dan logo SGG --}}
-    <header class="sgg-header" id="app-header">
-        <div class="sgg-header-inner">
-            <img src="{{ asset('images/logo-sgg.svg') }}" alt="Syifa Global Group Logo" class="sgg-logo-img">
-            <div class="sgg-logo-text">
-                <span class="brand">Syifa Global Group</span>
-                <span class="sub">Monitoring Project</span>
-            </div>
-        </div>
-    </header>
-
-    {{-- Konten utama (read-only) --}}
     <main class="sgg-main" id="app-main">
-        <div class="sgg-page-header">
-            <h1 class="sgg-page-title">Dashboard Monitoring</h1>
-            <p class="sgg-page-subtitle">Pantau seluruh progress proyek Syifa Global Group</p>
-        </div>
+        {{-- Ringkasan: dihitung dari data project yang sama dengan daftar --}}
+        @php
+            $total = $projects->count();
+            $done = $projects->where('status', 'Completed')->count();
+            $avg = $total > 0 ? (int) round($projects->avg('progress_percent')) : 0;
+        @endphp
 
-        {{-- Filter Perusahaan & PIC (logika di app.js) --}}
-        @if(count($projects) > 0)
-            <div class="sgg-filters">
-                <label class="sgg-filter">
-                    <span>Perusahaan</span>
-                    <select id="filter-company">
-                        <option value="">Semua Perusahaan</option>
-                        @foreach($companies as $company)
-                            <option value="{{ $company->id }}">{{ $company->name }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label class="sgg-filter">
-                    <span>PIC</span>
-                    <select id="filter-pic">
-                        <option value="">Semua PIC</option>
-                        @foreach($pics as $pic)
-                            <option value="{{ $pic->id }}">{{ $pic->nama }}</option>
-                        @endforeach
-                    </select>
-                </label>
-            </div>
-        @endif
+        <section class="sgg-stage">
+            {{-- Monitor layar penuh: navigasi (tab) dan daftar project ada di dalam layar --}}
+            <div class="sgg-monitor" id="monitor">
+                <div class="sgg-monitor-frame">
+                    <span class="sgg-hud sgg-hud--tl" aria-hidden="true"></span>
+                    <span class="sgg-hud sgg-hud--tr" aria-hidden="true"></span>
+                    <span class="sgg-hud sgg-hud--bl" aria-hidden="true"></span>
+                    <span class="sgg-hud sgg-hud--br" aria-hidden="true"></span>
 
-        {{-- Daftar kartu project: 1 baris 1 project --}}
-        <div class="sgg-project-list" id="project-list">
-            @foreach($projects as $index => $project)
-                {{-- Kelas dan label badge urgensi/status --}}
-                @php
-                    [$urgencyClass, $urgencyLabel] = match($project['urgency']) {
-                        'Medium' => ['sgg-badge--medium', 'Sedang'],
-                        'High'   => ['sgg-badge--high', 'Tinggi'],
-                        'Urgent' => ['sgg-badge--urgent', 'Darurat'],
-                        default  => ['sgg-badge--low', 'Rendah'],
-                    };
-                    $statusClass = $project['status'] === 'Completed' ? 'sgg-badge--completed' : 'sgg-badge--progress';
-                    $statusLabel = $project['status'] === 'Completed' ? 'Selesai' : 'Dalam Proses';
-                @endphp
-                <div class="sgg-project-card bg-white/90 backdrop-blur-sm dark:bg-gray-900/90"
-                     role="button" tabindex="0"
-                     data-project='@json($project)'
-                     data-company="{{ $project['company_id'] }}"
-                     data-pic="{{ $project['pic_id'] }}"
-                     style="--delay: {{ $index * 60 }}ms">
-                    {{-- 1. Logo, perusahaan, dan nama project --}}
-                    <div class="sgg-card-info">
-                        @if($project['logo'])
-                            <img src="{{ asset('storage/' . $project['logo']) }}"
-                                 alt="Logo {{ $project['title'] }}"
-                                 class="sgg-card-logo">
-                        @endif
-                        <div class="sgg-card-text">
-                            <div class="sgg-card-company">{{ $project['company_name'] }}</div>
-                            <div class="sgg-card-title">{{ $project['title'] }}</div>
+                    <div class="sgg-screen">
+                        {{-- Title bar: logo + judul + status live --}}
+                        <div class="sgg-screen-bar">
+                            {{-- Lingkaran dekoratif: di desktop tampil di sini, di mobile pindah ke bar bawah --}}
+                            <span class="sgg-screen-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                            {{-- Logo sistem disembunyikan sementara lewat CSS (.sgg-logo-img) --}}
+                            <img src="{{ asset('images/logo-sgg.svg') }}" alt="Syifa Global Group Logo" class="sgg-logo-img">
+                            <div class="sgg-logo-text">
+                                <h1 class="brand">Syifa Global Group</h1>
+                                <span class="sub">Monitoring Project</span>
+                            </div>
+                            <span class="sgg-live" title="Data diperbarui otomatis tiap 10 detik">
+                                <span class="sgg-live-dot"></span>Live
+                            </span>
+                            <button type="button" class="sgg-theme sgg-team-btn" id="pic-open" aria-haspopup="dialog">Tim PIC</button>
+                            <button type="button" class="sgg-theme" id="theme-toggle" aria-label="Ganti tema terang atau gelap">Gelap</button>
+                            @if($viewer)
+                                <button type="button" class="sgg-theme" id="logout-btn" title="Masuk sebagai {{ $viewer->name }}">Keluar</button>
+                            @else
+                                <button type="button" class="sgg-theme sgg-login-btn" id="login-open" aria-haspopup="dialog">Masuk PIC</button>
+                            @endif
+                            <span class="sgg-screen-progress" aria-hidden="true"></span>
                         </div>
-                    </div>
-                    <div class="sgg-card-body">
-                        {{-- 2. Deskripsi project --}}
-                        @if($project['description'])
-                            <p class="sgg-card-desc">{{ $project['description'] }}</p>
-                        @endif
-                        {{-- 3. PIC & Pemohon, melipat otomatis jika nama panjang --}}
-                        @if($project['pic_name'] || $project['pemohon'])
-                            <div class="sgg-card-meta">
-                                @if($project['pic_name'])
-                                    <span><strong>PIC:</strong> {{ $project['pic_name'] }}</span>
-                                @endif
-                                @if($project['pic_name'] && $project['pemohon'])
-                                    <span class="sgg-card-meta-sep">|</span>
-                                @endif
-                                @if($project['pemohon'])
-                                    <span><strong>Pemohon:</strong> {{ $project['pemohon'] }}</span>
-                                @endif
+
+                        {{-- Teks berjalan (satu-satunya marquee di halaman) --}}
+                        <div class="sgg-marquee" aria-hidden="true">
+                            <div class="sgg-marquee-track">
+                                @for($i = 0; $i < 8; $i++)
+                                    <span>Syifa Global Group</span><i></i><span>Monitoring Project</span><i></i><span>Progress Real-time</span><i></i><span>Satu Layar</span><i></i>
+                                @endfor
+                            </div>
+                        </div>
+
+                        @if(count($projects) > 0)
+                            {{-- Tab ringkasan sekaligus filter status (logika di app.js) --}}
+                            <div class="sgg-tabs" role="tablist" aria-label="Filter status project">
+                                <button type="button" role="tab" class="sgg-tab is-active" data-status="" aria-selected="true">
+                                    <span>Semua</span><b class="sgg-tab-count" data-count="all">{{ $total }}</b>
+                                </button>
+                                <button type="button" role="tab" class="sgg-tab" data-status="In Progress" aria-selected="false">
+                                    <span>Dalam Proses</span><b class="sgg-tab-count" data-count="progress">{{ $total - $done }}</b>
+                                </button>
+                                <button type="button" role="tab" class="sgg-tab" data-status="Completed" aria-selected="false">
+                                    <span>Selesai</span><b class="sgg-tab-count" data-count="done">{{ $done }}</b>
+                                </button>
+                                <div class="sgg-tab sgg-tab--stat">
+                                    <span>Rata-rata</span><b class="sgg-tab-count is-pink" data-count="avg">{{ $avg }}%</b>
+                                </div>
                             </div>
                         @endif
-                        {{-- 4. Catatan PIC (hanya di kartu, tidak di modal detail) --}}
-                        @if(!empty($project['catatan_pic']))
-                            <p class="sgg-card-desc mt-1.5"><strong>Catatan PIC:</strong> {{ $project['catatan_pic'] }}</p>
-                        @endif
-                    </div>
-                    {{-- Badge urgensi dan status --}}
-                    <div class="sgg-card-badges">
-                        <span class="sgg-badge {{ $urgencyClass }}"><span class="sgg-badge-dot"></span>{{ $urgencyLabel }}</span>
-                        <span class="sgg-badge {{ $statusClass }}"><span class="sgg-badge-dot"></span>{{ $statusLabel }}</span>
-                    </div>
-                    {{-- Progress bar --}}
-                    <div class="sgg-card-progress">
-                        <div class="sgg-progress-track">
-                            <div class="sgg-progress-fill" style="--percent: {{ $project['progress_percent'] }}%"></div>
+
+                        <div class="sgg-screen-scroll">
+                            {{-- Daftar kartu project: 1 baris 1 project --}}
+                            <div class="sgg-project-list" id="project-list">
+                                @foreach($projects as $index => $project)
+                                    @php
+                                        [$urgencyClass, $urgencyLabel] = match($project['urgency']) {
+                                            'Medium' => ['sgg-badge--medium', 'Sedang'],
+                                            'High'   => ['sgg-badge--high', 'Tinggi'],
+                                            'Urgent' => ['sgg-badge--urgent', 'Darurat'],
+                                            default  => ['sgg-badge--low', 'Rendah'],
+                                        };
+                                        $statusClass = $project['status'] === 'Completed' ? 'sgg-badge--completed' : 'sgg-badge--progress';
+                                        $statusLabel = $project['status'] === 'Completed' ? 'Selesai' : 'Dalam Proses';
+                                    @endphp
+                                    <div class="sgg-project-card{{ $project['color'] ? ' has-color' : '' }}"
+                                         @if($project['color']) style="--project-color: {{ $project['color'] }}" @endif
+                                         role="button" tabindex="0"
+                                         data-project='@json($project)'
+                                         data-company="{{ $project['company_id'] }}"
+                                         data-pic="{{ $project['pic_id'] }}"
+                                         data-status="{{ $project['status'] }}">
+                                        {{-- 1. Logo, perusahaan, dan nama project --}}
+                                        <div class="sgg-card-info">
+                                            @if($project['logo'])
+                                                <img src="{{ asset('storage/' . $project['logo']) }}"
+                                                     alt="Logo {{ $project['title'] }}"
+                                                     class="sgg-card-logo">
+                                            @endif
+                                            <div class="sgg-card-text">
+                                                <div class="sgg-card-company">{{ $project['company_name'] }}</div>
+                                                <div class="sgg-card-title">{{ $project['title'] }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="sgg-card-body">
+                                            @if($project['description'])
+                                                <p class="sgg-card-desc">{{ $project['description'] }}</p>
+                                            @endif
+                                            @if($project['pic_name'] || $project['pemohon'])
+                                                <div class="sgg-card-meta">
+                                                    @if($project['pic_name'])
+                                                        <span class="sgg-pic">
+                                                            @if($project['pic_photo'])
+                                                                <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="Foto {{ $project['pic_name'] }}" class="sgg-pic-photo">
+                                                            @else
+                                                                <span class="sgg-pic-photo sgg-pic-photo--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_name'], 0, 1)) }}</span>
+                                                            @endif
+                                                            <strong>PIC</strong> {{ $project['pic_name'] }}
+                                                        </span>
+                                                    @endif
+                                                    @if($project['pemohon'])
+                                                        <span class="sgg-meta-item"><strong>Stakeholder</strong> {{ $project['pemohon'] }}</span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                            @if(!empty($project['catatan_pic']))
+                                                <p class="sgg-card-note"><strong>Catatan PIC</strong> {{ $project['catatan_pic'] }}</p>
+                                            @endif
+                                        </div>
+                                        {{-- Badge urgensi dan status --}}
+                                        <div class="sgg-card-badges">
+                                            <span class="sgg-badge {{ $urgencyClass }}"><span class="sgg-badge-dot"></span>{{ $urgencyLabel }}</span>
+                                            <span class="sgg-badge {{ $statusClass }}"><span class="sgg-badge-dot"></span>{{ $statusLabel }}</span>
+                                        </div>
+                                        {{-- Progress bar --}}
+                                        <div class="sgg-card-progress">
+                                            <div class="sgg-progress-track">
+                                                <div class="sgg-progress-fill" style="--percent: {{ $project['progress_percent'] }}%"></div>
+                                            </div>
+                                            <span class="sgg-progress-text">{{ $project['progress_percent'] }}%</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            {{-- Pesan saat filter tidak menemukan project --}}
+                            <p class="sgg-filter-empty" id="filter-empty" hidden>Tidak ada project yang sesuai filter.</p>
+
+                            {{-- Tampilan kosong jika belum ada project --}}
+                            @if(count($projects) === 0)
+                                <div class="sgg-empty">
+                                    <h3>Belum Ada Project</h3>
+                                    <p>Tambahkan project lewat Admin Panel, daftar akan muncul di layar ini.</p>
+                                </div>
+                            @endif
                         </div>
-                        <span class="sgg-progress-text">{{ $project['progress_percent'] }}%</span>
+
+                        {{-- Bar bawah layar: filter Perusahaan & PIC (logika di app.js) + titik loading dekoratif --}}
+                        <div class="sgg-filters">
+                            @if(count($projects) > 0)
+                                <label class="sgg-filter">
+                                    <span>Perusahaan</span>
+                                    <select id="filter-company">
+                                        <option value="">Semua Perusahaan</option>
+                                        @foreach($companies as $company)
+                                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </label>
+                                <label class="sgg-filter">
+                                    <span>PIC</span>
+                                    <select id="filter-pic">
+                                        <option value="">Semua PIC</option>
+                                        @foreach($pics as $pic)
+                                            <option value="{{ $pic->id }}">{{ $pic->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </label>
+                            @endif
+                            {{-- Tiga lingkaran dekoratif: tidak bisa diklik, berkedip seperti indikator loading --}}
+                            <span class="sgg-bar-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                        </div>
                     </div>
                 </div>
-            @endforeach
-        </div>
-
-        {{-- Pesan saat filter tidak menemukan project --}}
-        <p class="sgg-filter-empty" id="filter-empty" hidden>Tidak ada project yang sesuai filter.</p>
-
-        {{-- Tampilan kosong jika belum ada project --}}
-        @if(count($projects) === 0)
-            <div class="sgg-empty">
-                <div class="sgg-empty-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <h3>Belum Ada Project</h3>
-                <p>Belum ada project yang dapat dipantau saat ini.</p>
+                {{-- Stand monitor --}}
+                <div class="sgg-monitor-neck" aria-hidden="true"></div>
+                <div class="sgg-monitor-base" aria-hidden="true"></div>
             </div>
-        @endif
+        </section>
     </main>
 
-    {{-- Modal popup detail project (Read Only) --}}
+    {{-- Modal daftar PIC / programmer beserta foto --}}
+    <div class="sgg-modal-overlay" id="pic-overlay">
+        <div class="sgg-modal sgg-modal--team" role="dialog" aria-modal="true" aria-labelledby="pic-title">
+            <div class="sgg-modal-header">
+                <div class="sgg-modal-header-info">
+                    <div class="sgg-modal-company">{{ $pics->count() }} orang</div>
+                    <div class="sgg-modal-title" id="pic-title">Tim PIC</div>
+                </div>
+                <button type="button" class="sgg-modal-close" data-close-pic aria-label="Tutup">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sgg-modal-body">
+                @forelse($pics as $pic)
+                    <div class="sgg-team-item">
+                        @if($pic->foto)
+                            <img src="{{ asset('storage/' . $pic->foto) }}" alt="Foto {{ $pic->nama }}" class="sgg-team-photo">
+                        @else
+                            <span class="sgg-team-photo sgg-team-photo--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($pic->nama, 0, 1)) }}</span>
+                        @endif
+                        <div class="sgg-team-text">
+                            <div class="sgg-team-name">{{ $pic->nama }}</div>
+                            @if($pic->jabatan || $pic->divisi)
+                                <div class="sgg-team-role">{{ collect([$pic->jabatan, $pic->divisi])->filter()->implode(', ') }}</div>
+                            @endif
+                        </div>
+                        <span class="sgg-badge sgg-badge--completed">{{ $pic->projects_count }} project</span>
+                    </div>
+                @empty
+                    <p class="sgg-modal-empty">Belum ada PIC yang terdaftar.</p>
+                @endforelse
+            </div>
+
+            <div class="sgg-modal-footer">
+                <button type="button" class="sgg-modal-close-btn" data-close-pic>Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal login PIC (hanya untuk tamu) --}}
+    @unless($viewer)
+        <div class="sgg-modal-overlay" id="login-overlay">
+            <div class="sgg-modal sgg-modal--login" role="dialog" aria-modal="true" aria-labelledby="login-title">
+                <form id="login-form" novalidate>
+                    <div class="sgg-modal-header">
+                        <div class="sgg-modal-header-info">
+                            <div class="sgg-modal-company">Akun PIC</div>
+                            <div class="sgg-modal-title" id="login-title">Masuk</div>
+                        </div>
+                        <button type="button" class="sgg-modal-close" data-close-login aria-label="Tutup">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="sgg-form-body">
+                        <label class="sgg-field">
+                            <span>Email</span>
+                            <input type="email" name="email" id="login-email" autocomplete="username" required>
+                        </label>
+                        <label class="sgg-field">
+                            <span>Password</span>
+                            <input type="password" name="password" autocomplete="current-password" required>
+                        </label>
+                        <p class="sgg-form-error" id="login-error" role="alert" hidden></p>
+                    </div>
+
+                    <div class="sgg-modal-footer">
+                        <button type="submit" class="sgg-modal-close-btn" id="login-submit">Masuk</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endunless
+
+    {{-- Modal popup detail project --}}
     <div class="sgg-modal-overlay" id="detail-overlay">
         <div class="sgg-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
             <div class="sgg-modal-header">
@@ -175,6 +313,7 @@
             <div class="sgg-modal-body">
                 <div class="sgg-modal-body-title">Daftar Tugas</div>
                 <div id="detail-checklist-container"></div>
+                <p class="sgg-form-error" id="task-error" role="alert" hidden></p>
             </div>
 
             <div class="sgg-modal-footer">
@@ -183,7 +322,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/monitoring.js') }}"></script>
-    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/monitoring.js') }}?v={{ filemtime(public_path('js/monitoring.js')) }}"></script>
+    <script src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}"></script>
 </body>
 </html>

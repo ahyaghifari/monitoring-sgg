@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
@@ -112,6 +113,11 @@ class ProjectResource extends Resource
                 ->imageEditor()
                 ->circleCropper()
                 ->maxSize(2048),
+
+            ColorPicker::make('warna')
+                ->label('Warna Project')
+                ->helperText('Dipakai untuk strip, bayangan, dan progress kartu di dashboard. Kosongkan untuk warna bawaan.')
+                ->regex('/^#[0-9a-fA-F]{6}$/'),
 
             Select::make('urgency')
                 ->label('Tingkat Urgensi')

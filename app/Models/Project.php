@@ -18,6 +18,7 @@ class Project extends Model
         'pemohon',
         'catatan_pic',
         'logo',
+        'warna',
         'urgency',
         'status',
         'progress_mode',

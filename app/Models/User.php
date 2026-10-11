@@ -10,6 +10,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -34,10 +35,22 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    // Semua akun terdaftar boleh masuk panel; batas menu diatur per resource via role
+    // Akun PIC hanya kelola tugas di beranda; panel admin untuk Super Admin dan Admin/Staff
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->role !== UserRole::PIC;
+    }
+
+    public function pic(): HasOne
+    {
+        return $this->hasOne(Pic::class);
+    }
+
+    // Super Admin boleh mengelola tugas semua project; PIC hanya project miliknya
+    public function canManageProject(Project $project): bool
+    {
+        return $this->isSuperAdmin()
+            || ($project->pic_id !== null && $this->pic?->id === $project->pic_id);
     }
 
     // Super Admin boleh mengakses semua menu admin
