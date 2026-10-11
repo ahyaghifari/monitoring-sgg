@@ -231,8 +231,12 @@
             </div>
 
             <div class="sgg-modal-body">
+                @if($pics->isNotEmpty())
+                    {{-- Slider horizontal: bergeser otomatis tiap beberapa detik (diatur app.js) --}}
+                    <div class="sgg-team-track" id="pic-track" tabindex="0" role="list" aria-label="Daftar PIC">
+                @endif
                 @forelse($pics as $pic)
-                    <div class="sgg-team-item">
+                    <div class="sgg-team-item" role="listitem">
                         @if($pic->foto)
                             <img src="{{ asset('storage/' . $pic->foto) }}" alt="Foto {{ $pic->nama }}" class="sgg-team-photo">
                         @else
@@ -249,6 +253,9 @@
                 @empty
                     <p class="sgg-modal-empty">Belum ada PIC yang terdaftar.</p>
                 @endforelse
+                @if($pics->isNotEmpty())
+                    </div>
+                @endif
             </div>
 
             <div class="sgg-modal-footer">

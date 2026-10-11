@@ -474,12 +474,25 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
 .sgg-modal--team .sgg-modal-close { width: 46px; height: 46px; }
 .sgg-modal--team .sgg-modal-close svg { width: 22px; height: 22px; }
 .sgg-modal--team .sgg-modal-body { padding: 8px 36px 32px; }
-.sgg-modal--team .sgg-team-item { gap: 24px; padding: 20px 24px; margin-top: 16px; box-shadow: 5px 5px 0 var(--green); }
+/* Slider kartu PIC: scroll-snap horizontal */
+.sgg-team-track {
+    display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    padding: 20px 8px 28px; margin: 0 -8px; scrollbar-width: thin; scrollbar-color: var(--pink-hi) transparent;
+}
+.sgg-team-track::-webkit-scrollbar { height: 8px; }
+.sgg-team-track::-webkit-scrollbar-thumb { background: var(--pink-hi); border: 2px solid var(--ink); border-radius: 9999px; }
+.sgg-team-track:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
+.sgg-modal--team .sgg-team-item {
+    flex: 0 0 min(260px, 78%); scroll-snap-align: start; margin-top: 0;
+    flex-direction: column; justify-content: flex-start; text-align: center; gap: 14px; padding: 24px 20px;
+    box-shadow: 5px 5px 0 var(--green);
+}
+.sgg-modal--team .sgg-team-text { flex: 0 1 auto; width: 100%; }
 .sgg-modal--team .sgg-team-item:nth-child(even) { box-shadow: 5px 5px 0 var(--pink-hi); }
-.sgg-modal--team .sgg-team-photo { width: 104px; height: 104px; border-width: 3px; }
+.sgg-modal--team .sgg-team-photo { width: 120px; height: 120px; border-width: 3px; }
 .sgg-modal--team .sgg-team-photo--initial { font-size: 40px; }
-.sgg-modal--team .sgg-team-name { font-size: 26px; }
-.sgg-modal--team .sgg-team-role { margin-top: 4px; font-size: 17px; }
+.sgg-modal--team .sgg-team-name { font-size: 22px; }
+.sgg-modal--team .sgg-team-role { margin-top: 4px; font-size: 15px; }
 .sgg-modal--team .sgg-badge { font-size: 14px; padding: 6px 16px; }
 .sgg-modal--team .sgg-modal-footer { padding: 20px 36px; }
 .sgg-modal--team .sgg-modal-close-btn { padding: 12px 32px; font-size: 16px; }
@@ -550,10 +563,10 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     .sgg-modal--team .sgg-modal-title { font-size: 30px; }
     .sgg-modal--team .sgg-modal-body { padding: 4px 16px 20px; }
     .sgg-modal--team .sgg-modal-footer { padding: 14px 16px; }
-    .sgg-modal--team .sgg-team-item { flex-wrap: wrap; gap: 14px; padding: 14px; }
-    .sgg-modal--team .sgg-team-photo { width: 72px; height: 72px; }
-    .sgg-modal--team .sgg-team-name { font-size: 20px; }
-    .sgg-modal--team .sgg-team-role { font-size: 14px; }
+    .sgg-modal--team .sgg-team-item { gap: 10px; padding: 18px 14px; }
+    .sgg-modal--team .sgg-team-photo { width: 92px; height: 92px; }
+    .sgg-modal--team .sgg-team-name { font-size: 18px; }
+    .sgg-modal--team .sgg-team-role { font-size: 13px; }
     .sgg-modal--team .sgg-badge { font-size: 12px; padding: 3px 12px; }
     .sgg-tabs { gap: 6px; padding: 8px 10px 0; }
     .sgg-tab { gap: 6px; padding: 4px 8px; font-size: 12px; border-radius: 10px; box-shadow: 2px 2px 0 var(--green); }

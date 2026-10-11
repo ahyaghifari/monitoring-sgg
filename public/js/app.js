@@ -130,9 +130,55 @@ syncThemeButton();
 // Modal daftar PIC: buka lewat tombol, tutup lewat tombol, klik area gelap, atau Esc
 const picOverlay = document.getElementById('pic-overlay');
 
+// Slider kartu PIC: geser satu kartu ke kanan tiap PIC_SLIDE_MS, kembali ke awal di ujung
+const PIC_SLIDE_MS = 3000;
+const picTrack = document.getElementById('pic-track');
+let picTimer = null;
+let picPaused = false;
+
+function stopPicAutoplay() {
+    clearInterval(picTimer);
+    picTimer = null;
+}
+
+function startPicAutoplay() {
+    stopPicAutoplay();
+    if (!picTrack || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    picTimer = setInterval(() => {
+        // Tidak ada yang perlu digeser bila semua kartu sudah muat, atau sedang disentuh/ditunjuk
+        if (picPaused || picTrack.scrollWidth <= picTrack.clientWidth + 4) return;
+
+        const card = picTrack.querySelector('.sgg-team-item');
+        const gap = parseFloat(getComputedStyle(picTrack).columnGap) || 0;
+        const atEnd = picTrack.scrollLeft + picTrack.clientWidth >= picTrack.scrollWidth - 4;
+        picTrack.scrollTo({ left: atEnd ? 0 : picTrack.scrollLeft + card.offsetWidth + gap, behavior: 'smooth' });
+    }, PIC_SLIDE_MS);
+}
+
+if (picTrack) {
+    const pause = () => { picPaused = true; };
+    const resume = () => { picPaused = false; };
+    picTrack.addEventListener('mouseenter', pause);
+    picTrack.addEventListener('mouseleave', resume);
+    picTrack.addEventListener('focusin', pause);
+    picTrack.addEventListener('focusout', resume);
+    picTrack.addEventListener('touchstart', pause, { passive: true });
+    // Beri waktu membaca setelah jari dilepas sebelum slide berjalan lagi
+    picTrack.addEventListener('touchend', () => setTimeout(resume, 4000), { passive: true });
+}
+
 function setPicModal(open) {
     picOverlay.classList.toggle('active', open);
     document.body.style.overflow = open ? 'hidden' : '';
+
+    if (open) {
+        if (picTrack) picTrack.scrollLeft = 0;
+        picPaused = false;
+        startPicAutoplay();
+    } else {
+        stopPicAutoplay();
+    }
 }
 
 document.getElementById('pic-open')?.addEventListener('click', () => setPicModal(true));
