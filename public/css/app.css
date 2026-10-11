@@ -703,6 +703,21 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     .sgg-card-meta:not(:has(.sgg-pic-note)) { display: none; }
 }
 
+/* ---------- Tombol masuk/keluar PIC: mobile di kaki monitor, desktop di pojok kanan bar filter ---------- */
+.sgg-bar-auth { display: none; }
+@media (min-width: 768px) {
+    /* Stand lebih pendek dan tanpa tombol di desktop */
+    .sgg-monitor-neck { height: 14px; }
+    .sgg-monitor-base { height: 16px; width: min(300px, 55%); }
+    .sgg-monitor-base .sgg-base-btn { display: none; }
+
+    .sgg-bar-auth {
+        display: inline-flex; align-items: center; margin: 0 0 0 auto; padding: 5px 16px; font-size: 13px;
+        background: var(--paper);
+    }
+    .sgg-login-btn.sgg-bar-auth { background: var(--green-hi); }
+}
+
 /* ---------- Desktop: deskripsi, catatan, dan status di kartu diperkecil ---------- */
 @media (min-width: 768px) {
     .sgg-card-desc { font-size: 12.5px; line-height: 1.4; }

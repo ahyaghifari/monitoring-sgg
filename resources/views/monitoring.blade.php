@@ -219,6 +219,12 @@
                             @endif
                             {{-- Tiga lingkaran dekoratif: tidak bisa diklik, berkedip seperti indikator loading --}}
                             <span class="sgg-bar-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                            {{-- Desktop: tombol masuk/keluar PIC di pojok kanan bar, berseberangan dengan filter --}}
+                            @if($viewer)
+                                <button type="button" class="sgg-theme sgg-bar-auth" data-logout title="Masuk sebagai {{ $viewer->name }}">Keluar</button>
+                            @else
+                                <button type="button" class="sgg-theme sgg-login-btn sgg-bar-auth" data-login-open aria-haspopup="dialog">Masuk PIC</button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -227,9 +233,9 @@
                 {{-- Tombol masuk/keluar PIC diletakkan di tengah kaki monitor --}}
                 <div class="sgg-monitor-base">
                     @if($viewer)
-                        <button type="button" class="sgg-theme sgg-base-btn" id="logout-btn" title="Masuk sebagai {{ $viewer->name }}">Keluar</button>
+                        <button type="button" class="sgg-theme sgg-base-btn" data-logout title="Masuk sebagai {{ $viewer->name }}">Keluar</button>
                     @else
-                        <button type="button" class="sgg-theme sgg-login-btn sgg-base-btn" id="login-open" aria-haspopup="dialog">Masuk PIC</button>
+                        <button type="button" class="sgg-theme sgg-login-btn sgg-base-btn" data-login-open aria-haspopup="dialog">Masuk PIC</button>
                     @endif
                 </div>
             </div>

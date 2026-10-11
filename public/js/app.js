@@ -211,7 +211,7 @@ function setLoginModal(open) {
     if (open) setTimeout(() => document.getElementById('login-email')?.focus(), 50);
 }
 
-document.getElementById('login-open')?.addEventListener('click', () => setLoginModal(true));
+document.querySelectorAll('[data-login-open]').forEach(btn => btn.addEventListener('click', () => setLoginModal(true)));
 loginOverlay?.addEventListener('click', (e) => {
     if (e.target === loginOverlay || e.target.closest('[data-close-login]')) setLoginModal(false);
 });
@@ -251,6 +251,6 @@ loginForm?.addEventListener('submit', async (e) => {
     }
 });
 
-document.getElementById('logout-btn')?.addEventListener('click', async () => {
+document.querySelectorAll('[data-logout]').forEach(btn => btn.addEventListener('click', async () => {
     try { await postSession('/keluar'); } finally { location.reload(); }
-});
+}));
