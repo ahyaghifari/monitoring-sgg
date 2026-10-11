@@ -109,8 +109,13 @@ function currentTheme() {
 }
 
 function syncThemeButton() {
-    // Label menunjukkan mode tujuan
-    if (themeBtn) themeBtn.textContent = currentTheme() === 'dark' ? 'Terang' : 'Gelap';
+    // Ikon menunjukkan mode tujuan (CSS membaca data-current untuk memilih bulan atau matahari)
+    if (!themeBtn) return;
+    const dark = currentTheme() === 'dark';
+    const label = dark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap';
+    themeBtn.dataset.current = dark ? 'dark' : 'light';
+    themeBtn.setAttribute('aria-label', label);
+    themeBtn.title = label;
 }
 
 themeBtn?.addEventListener('click', () => {

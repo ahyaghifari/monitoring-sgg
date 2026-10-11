@@ -164,7 +164,8 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
 /* Stand monitor */
 .sgg-monitor-neck { flex-shrink: 0; width: 84px; height: 28px; background: repeating-linear-gradient(90deg, #005c2e 0 6px, var(--green) 6px 12px); border-inline: 3px solid var(--ink); }
 .sgg-monitor-base {
-    flex-shrink: 0; width: min(300px, 55%); height: 16px; border-radius: 9999px;
+    flex-shrink: 0; width: min(340px, 80%); height: 46px; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
     background: linear-gradient(90deg, var(--green), var(--green-hi) 70%, var(--pink-hi)); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
 }
 
@@ -437,6 +438,15 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     transition: translate .15s, box-shadow .15s;
 }
 .sgg-theme:active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--ink); }
+/* Tombol tema berupa ikon persegi; ikon yang tampil = mode tujuan */
+.sgg-theme--icon { width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.sgg-theme--icon svg { width: 18px; height: 18px; }
+.sgg-theme--icon .ico-sun { display: none; }
+.sgg-theme--icon[data-current="dark"] .ico-moon { display: none; }
+.sgg-theme--icon[data-current="dark"] .ico-sun { display: inline; }
+/* Tombol masuk/keluar di kaki monitor */
+.sgg-base-btn { margin: 0 !important; padding: 5px 18px; font-size: 13px; background: var(--paper); }
+.sgg-login-btn.sgg-base-btn { background: var(--green-hi); }
 .sgg-theme:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
 .sgg-screen-bar .sgg-live { margin-left: auto; }
 .sgg-screen-bar .sgg-theme { margin-left: 0; }

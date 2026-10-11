@@ -49,12 +49,15 @@
                                 <span class="sgg-live-dot"></span>Live
                             </span>
                             <button type="button" class="sgg-theme sgg-team-btn" id="pic-open" aria-haspopup="dialog">Tim PIC</button>
-                            <button type="button" class="sgg-theme" id="theme-toggle" aria-label="Ganti tema terang atau gelap">Gelap</button>
-                            @if($viewer)
-                                <button type="button" class="sgg-theme" id="logout-btn" title="Masuk sebagai {{ $viewer->name }}">Keluar</button>
-                            @else
-                                <button type="button" class="sgg-theme sgg-login-btn" id="login-open" aria-haspopup="dialog">Masuk PIC</button>
-                            @endif
+                            {{-- Tombol tema berupa ikon: bulan = pindah ke gelap, matahari = pindah ke terang (diatur app.js) --}}
+                            <button type="button" class="sgg-theme sgg-theme--icon" id="theme-toggle" data-current="light" aria-label="Ganti ke mode gelap" title="Ganti ke mode gelap">
+                                <svg class="ico-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+                                </svg>
+                                <svg class="ico-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+                                </svg>
+                            </button>
                             <span class="sgg-screen-progress" aria-hidden="true"></span>
                         </div>
 
@@ -200,7 +203,14 @@
                 </div>
                 {{-- Stand monitor --}}
                 <div class="sgg-monitor-neck" aria-hidden="true"></div>
-                <div class="sgg-monitor-base" aria-hidden="true"></div>
+                {{-- Tombol masuk/keluar PIC diletakkan di tengah kaki monitor --}}
+                <div class="sgg-monitor-base">
+                    @if($viewer)
+                        <button type="button" class="sgg-theme sgg-base-btn" id="logout-btn" title="Masuk sebagai {{ $viewer->name }}">Keluar</button>
+                    @else
+                        <button type="button" class="sgg-theme sgg-login-btn sgg-base-btn" id="login-open" aria-haspopup="dialog">Masuk PIC</button>
+                    @endif
+                </div>
             </div>
         </section>
     </main>
