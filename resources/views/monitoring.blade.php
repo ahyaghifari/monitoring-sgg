@@ -102,13 +102,23 @@
                                         $statusClass = $project['status'] === 'Completed' ? 'sgg-badge--completed' : 'sgg-badge--progress';
                                         $statusLabel = $project['status'] === 'Completed' ? 'Selesai' : 'Dalam Proses';
                                     @endphp
-                                    <div class="sgg-project-card{{ $project['color'] ? ' has-color' : '' }}"
+                                    <div class="sgg-project-card{{ $project['color'] ? ' has-color' : '' }}{{ $project['pic_photo'] ? ' has-photo' : '' }}"
                                          @if($project['color']) style="--project-color: {{ $project['color'] }}" @endif
                                          role="button" tabindex="0"
                                          data-project='@json($project)'
                                          data-company="{{ $project['company_id'] }}"
                                          data-pic="{{ $project['pic_id'] }}"
                                          data-status="{{ $project['status'] }}">
+                                        {{-- Foto PIC besar sebagai latar di sisi kanan kartu (dekoratif; nama PIC sudah tertulis) --}}
+                                        @if($project['pic_photo'])
+                                            <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-card-bgphoto" aria-hidden="true" loading="lazy">
+                                        @elseif($project['pic_name'])
+                                            <span class="sgg-card-bgphoto sgg-card-bgphoto--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_name'], 0, 1)) }}</span>
+                                        @endif
+                                        {{-- Keterangan PIC: desktop di bawah foto kolom kiri, mobile di bawah avatar kanan atas --}}
+                                        @if($project['pic_name'])
+                                            <span class="sgg-card-piccap" aria-hidden="true"><b>PIC</b><span>{{ $project['pic_name'] }}</span></span>
+                                        @endif
                                         {{-- 1. Logo, perusahaan, dan nama project --}}
                                         <div class="sgg-card-info">
                                             @if($project['logo'])
@@ -125,31 +135,42 @@
                                             @if($project['description'])
                                                 <p class="sgg-card-desc">{{ $project['description'] }}</p>
                                             @endif
-                                            @if($project['pic_name'] || $project['pemohon'])
+                                            @if($project['pic_name'])
                                                 <div class="sgg-card-meta">
                                                     @if($project['pic_name'])
                                                         <span class="sgg-pic">
-                                                            @if($project['pic_photo'])
-                                                                <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="Foto {{ $project['pic_name'] }}" class="sgg-pic-photo">
-                                                            @else
-                                                                <span class="sgg-pic-photo sgg-pic-photo--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_name'], 0, 1)) }}</span>
-                                                            @endif
-                                                            <strong>PIC</strong> {{ $project['pic_name'] }}
+                                                            <span class="sgg-pic-text">
+                                                                <span class="sgg-pic-line"><strong>PIC</strong> {{ $project['pic_name'] }}</span>
+                                                                {{-- Catatan PIC tepat di bawah nama PIC, dikutip dan miring --}}
+                                                                @if(!empty($project['catatan_pic']))
+                                                                    <em class="sgg-pic-note">“{{ $project['catatan_pic'] }}”</em>
+                                                                @endif
+                                                            </span>
                                                         </span>
-                                                    @endif
-                                                    @if($project['pemohon'])
-                                                        <span class="sgg-meta-item"><strong>Stakeholder</strong> {{ $project['pemohon'] }}</span>
                                                     @endif
                                                 </div>
                                             @endif
-                                            @if(!empty($project['catatan_pic']))
-                                                <p class="sgg-card-note"><strong>Catatan PIC</strong> {{ $project['catatan_pic'] }}</p>
+                                            {{-- Catatan tanpa PIC: tetap ditampilkan, tanpa label --}}
+                                            @if(!empty($project['catatan_pic']) && !$project['pic_name'])
+                                                <p class="sgg-pic-note sgg-pic-note--solo"><em>“{{ $project['catatan_pic'] }}”</em></p>
                                             @endif
                                         </div>
                                         {{-- Badge urgensi dan status --}}
                                         <div class="sgg-card-badges">
                                             <span class="sgg-badge {{ $urgencyClass }}"><span class="sgg-badge-dot"></span>{{ $urgencyLabel }}</span>
                                             <span class="sgg-badge {{ $statusClass }}"><span class="sgg-badge-dot"></span>{{ $statusLabel }}</span>
+                                            {{-- Mobile: PIC di samping status, format: | avatar nama (tanpa label "PIC") --}}
+                                            @if($project['pic_name'])
+                                                <span class="sgg-card-picinline">
+                                                    <span class="sgg-card-picsep" aria-hidden="true">|</span>
+                                                    @if($project['pic_photo'])
+                                                        <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-card-picavatar" loading="lazy">
+                                                    @else
+                                                        <span class="sgg-card-picavatar sgg-card-picavatar--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_name'], 0, 1)) }}</span>
+                                                    @endif
+                                                    <span class="sgg-card-picname">{{ $project['pic_name'] }}</span>
+                                                </span>
+                                            @endif
                                         </div>
                                         {{-- Progress bar --}}
                                         <div class="sgg-card-progress">
@@ -328,6 +349,9 @@
 
             {{-- Daftar tugas checklist (diisi oleh monitoring.js) --}}
             <div class="sgg-modal-body">
+                {{-- Deskripsi lengkap (di kartu hanya 1 baris) --}}
+                <p class="sgg-modal-stakeholder" id="detail-stakeholder" hidden><strong>Stakeholder</strong> <span></span></p>
+                <p class="sgg-modal-desc" id="detail-desc" hidden></p>
                 <div class="sgg-modal-body-title">Daftar Tugas</div>
                 <div id="detail-checklist-container"></div>
                 <p class="sgg-form-error" id="task-error" role="alert" hidden></p>

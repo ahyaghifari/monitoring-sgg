@@ -99,6 +99,14 @@ function fillModal(p) {
 
     document.getElementById('detail-company').textContent = p.company_name;
     document.getElementById('detail-title').textContent = p.title;
+    // Stakeholder hanya tampil di modal (tidak di kartu)
+    const stakeholder = document.getElementById('detail-stakeholder');
+    stakeholder.querySelector('span').textContent = p.pemohon || '';
+    stakeholder.hidden = !p.pemohon;
+
+    const desc = document.getElementById('detail-desc');
+    desc.textContent = p.description || '';
+    desc.hidden = !p.description;
     document.getElementById('detail-badges').innerHTML =
         badge(u.cls, u.label) +
         badge(done ? 'sgg-badge--completed' : 'sgg-badge--progress', done ? 'Selesai' : 'Dalam Proses');
