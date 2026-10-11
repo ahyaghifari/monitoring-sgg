@@ -159,9 +159,9 @@
                                         <div class="sgg-card-badges">
                                             <span class="sgg-badge {{ $urgencyClass }}"><span class="sgg-badge-dot"></span>{{ $urgencyLabel }}</span>
                                             <span class="sgg-badge {{ $statusClass }}"><span class="sgg-badge-dot"></span>{{ $statusLabel }}</span>
-                                            {{-- Mobile: PIC di samping status, format: | avatar nama (tanpa label "PIC") --}}
+                                            {{-- Mobile: hanya avatar PIC di samping status; nama ada di tooltip dan untuk pembaca layar --}}
                                             @if($project['pic_name'])
-                                                <span class="sgg-card-picinline">
+                                                <span class="sgg-card-picinline" title="PIC: {{ $project['pic_name'] }}">
                                                     <span class="sgg-card-picsep" aria-hidden="true">|</span>
                                                     @if($project['pic_photo'])
                                                         <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-card-picavatar" loading="lazy">
