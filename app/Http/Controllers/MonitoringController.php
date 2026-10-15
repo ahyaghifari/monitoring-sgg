@@ -18,8 +18,10 @@ class MonitoringController extends Controller
     {
         $viewer = auth()->user();
 
-        // Mengambil data project beserta relasi tugas, perusahaan, dan PIC, terbaru di atas
+        // Mengambil data project beserta relasi tugas, perusahaan, dan PIC.
+        // Project selesai tetap tampil tetapi di paling bawah; di tiap kelompok, terbaru di atas.
         $projects = Project::with(['company', 'pic', 'picKedua', 'checklists'])
+            ->orderByRaw("CASE WHEN status = 'Completed' THEN 1 ELSE 0 END")
             ->orderBy('created_at', 'desc')
             ->get()
             // Ubah ke array ringan untuk view dan atribut data-project di kartu
