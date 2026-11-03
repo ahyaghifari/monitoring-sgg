@@ -306,13 +306,9 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     .has-photo2 .sgg-card-photos { width: calc(var(--photo-w, 130px) + 40px); }
     .sgg-ph { position: absolute; bottom: 0; object-fit: cover; object-position: center top; }
     .sgg-ph--main { z-index: 1; top: 0; left: 0; width: var(--photo-w, 130px); height: 100%; }
-    /* Dua PIC: utama sedikit ke kiri dengan tepi kanan memudar; kedua lebih kecil di belakang, menempel di dasar kanan */
-    .has-photo2 .sgg-ph--main {
-        left: -10px;
-        -webkit-mask-image: linear-gradient(to right, #000 80%, transparent 100%);
-        mask-image: linear-gradient(to right, #000 80%, transparent 100%);
-    }
-    .sgg-ph--second { z-index: 0; right: 0; width: 108px; height: 82%; }
+    /* Dua PIC: utama sedikit ke kiri tanpa efek apa pun; kedua berukuran sama di belakangnya, menempel di sisi kanan container */
+    .has-photo2 .sgg-ph--main { left: -10px; }
+    .sgg-ph--second { z-index: 0; top: 0; right: 0; width: var(--photo-w, 130px); height: 100%; }
     /* Keterangan nama menutupi dasar container (kedua foto), gradasinya satu */
     .sgg-ph-cap {
         position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
