@@ -716,7 +716,9 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     .sgg-card-bgphoto:not(.sgg-card-bgphoto--initial):not(.sgg-card-bgphoto--second) { z-index: 1; }
     /* PIC kedua: lebih kecil, di belakang, menempel di dasar kanan kolom; tanpa filter agar latar putihnya menyatu */
     .sgg-card-bgphoto--second:not(.sgg-card-bgphoto--initial) {
-        z-index: 0; top: auto; bottom: 0; left: auto; right: 0; width: 108px; height: 82%; filter: none;
+        /* left dihitung dari tepi kiri kartu: ujung kanan foto = ujung kanan kolom (lebar foto + 40px) */
+        z-index: 0; top: auto; bottom: 0; right: auto; width: 108px; height: 82%; filter: none;
+        left: calc(var(--photo-w, 130px) + 40px - 108px);
     }
     /* Satu kotak untuk dua foto: garis pemisah milik kolom, bukan milik tiap foto */
     .sgg-project-card.has-photo2 .sgg-card-bgphoto:not(.sgg-card-bgphoto--initial) { border-right: 0; }
