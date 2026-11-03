@@ -110,19 +110,17 @@
                                          data-pic="{{ $project['pic_id'] }}"
                                          data-pic2="{{ $project['pic_kedua_id'] }}"
                                          data-status="{{ $project['status'] }}">
-                                        {{-- Foto PIC besar sebagai latar di sisi kanan kartu (dekoratif; nama PIC sudah tertulis) --}}
-                                        @if($project['pic_photo'] && $project['pic_kedua_photo'])
-                                            {{-- PIC kedua: di belakang PIC utama, bagian tepinya tetap terlihat --}}
-                                            <img src="{{ asset('storage/' . $project['pic_kedua_photo']) }}" alt="" class="sgg-card-bgphoto sgg-card-bgphoto--second" aria-hidden="true" loading="lazy">
-                                        @endif
+                                        {{-- Foto PIC (utama + kedua) dan keterangan namanya dalam SATU container (desktop; dekoratif) --}}
                                         @if($project['pic_photo'])
-                                            <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-card-bgphoto" aria-hidden="true" loading="lazy">
+                                            <div class="sgg-card-photos" aria-hidden="true">
+                                                @if($project['pic_kedua_photo'])
+                                                    <img src="{{ asset('storage/' . $project['pic_kedua_photo']) }}" alt="" class="sgg-ph sgg-ph--second" loading="lazy">
+                                                @endif
+                                                <img src="{{ asset('storage/' . $project['pic_photo']) }}" alt="" class="sgg-ph sgg-ph--main" loading="lazy">
+                                                <span class="sgg-ph-cap"><b>PIC</b><span>{{ $project['pic_name'] }}</span>@if($project['pic_kedua_name'])<span class="sgg-ph-cap-2">{{ $project['pic_kedua_name'] }}</span>@endif</span>
+                                            </div>
                                         @elseif($project['pic_name'])
                                             <span class="sgg-card-bgphoto sgg-card-bgphoto--initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($project['pic_name'], 0, 1)) }}</span>
-                                        @endif
-                                        {{-- Keterangan PIC: desktop di bawah foto kolom kiri, mobile di bawah avatar kanan atas --}}
-                                        @if($project['pic_name'])
-                                            <span class="sgg-card-piccap" aria-hidden="true"><b>PIC</b><span>{{ $project['pic_name'] }}</span>@if($project['pic_kedua_name'])<span class="sgg-card-piccap-2">{{ $project['pic_kedua_name'] }}</span>@endif</span>
                                         @endif
                                         {{-- 1. Logo, perusahaan, dan nama project --}}
                                         <div class="sgg-card-info">
