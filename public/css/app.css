@@ -714,8 +714,9 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
     /* Foto utama 120px di depan; foto kedua digeser 40px ke kanan sehingga tepinya mengintip */
     .sgg-project-card.has-photo2 { padding-left: calc(var(--photo-w, 130px) + 40px + 24px); }
     .sgg-card-bgphoto:not(.sgg-card-bgphoto--initial):not(.sgg-card-bgphoto--second) { z-index: 1; }
+    /* PIC kedua: lebih kecil, di belakang, menempel di dasar kanan kolom; tanpa filter agar latar putihnya menyatu */
     .sgg-card-bgphoto--second:not(.sgg-card-bgphoto--initial) {
-        z-index: 0; left: 40px; filter: brightness(.88) saturate(.9);
+        z-index: 0; top: auto; bottom: 0; left: auto; right: 0; width: 108px; height: 82%; filter: none;
     }
     /* Satu kotak untuk dua foto: garis pemisah milik kolom, bukan milik tiap foto */
     .sgg-project-card.has-photo2 .sgg-card-bgphoto:not(.sgg-card-bgphoto--initial) { border-right: 0; }
@@ -724,7 +725,12 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
         width: calc(var(--photo-w, 130px) + 40px); border-right: 2px solid var(--ink); pointer-events: none;
     }
     /* PIC utama digeser sedikit ke kiri; tepi kiri yang lebih dipangkas oleh kartu */
-    .sgg-project-card.has-photo2 .sgg-card-bgphoto:not(.sgg-card-bgphoto--second):not(.sgg-card-bgphoto--initial) { left: -10px; }
+    .sgg-project-card.has-photo2 .sgg-card-bgphoto:not(.sgg-card-bgphoto--second):not(.sgg-card-bgphoto--initial) {
+        left: -10px;
+        /* Tepi kanan foto utama memudar sehingga tidak tampak sebagai kotak di atas foto kedua */
+        -webkit-mask-image: linear-gradient(to right, #000 80%, transparent 100%);
+        mask-image: linear-gradient(to right, #000 80%, transparent 100%);
+    }
     .sgg-project-card.has-photo2 .sgg-card-piccap { z-index: 2; }
 }
 @media (max-width: 767px) {
