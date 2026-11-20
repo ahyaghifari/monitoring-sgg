@@ -75,9 +75,10 @@ class Project extends Model
         return $this->belongsTo(Pic::class, 'pic_kedua_id');
     }
 
+    // Urut sesuai susunan drag & drop; id sebagai pemecah seri
     public function checklists(): HasMany
     {
-        return $this->hasMany(ProjectChecklist::class);
+        return $this->hasMany(ProjectChecklist::class)->orderBy('sort_order')->orderBy('id');
     }
 
     public function isManualMode(): bool

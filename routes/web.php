@@ -19,6 +19,7 @@ Route::post('/masuk', [PicSessionController::class, 'store'])->middleware('throt
 Route::middleware('auth')->group(function () {
     Route::post('/keluar', [PicSessionController::class, 'destroy'])->name('pic.logout');
     Route::post('/projects/{project}/tasks', [ProjectTaskController::class, 'store'])->name('tasks.store');
+    Route::put('/projects/{project}/tasks/order', [ProjectTaskController::class, 'reorder'])->name('tasks.reorder');
     Route::patch('/tasks/{checklist}', [ProjectTaskController::class, 'update'])->name('tasks.update');
     Route::delete('/tasks/{checklist}', [ProjectTaskController::class, 'destroy'])->name('tasks.destroy');
 });

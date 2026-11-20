@@ -180,7 +180,8 @@ class ProjectResource extends Resource
             ->columns(2)
             ->addActionLabel('Tambah Tugas')
             ->defaultItems(0)
-            ->reorderable(false)
+            // Urutan tugas bisa digeser dan disimpan ke kolom sort_order (sama dengan drag & drop di beranda)
+            ->orderColumn('sort_order')
             ->visible(fn (Get $get): bool => $get('progress_mode') !== 'manual')
             ->columnSpanFull();
     }

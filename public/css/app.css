@@ -596,6 +596,23 @@ button.sgg-tab.is-active { color: var(--navy); background: var(--green-hi); tran
 .sgg-task-del:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; }
 #detail-checklist-container.is-busy { opacity: .55; pointer-events: none; }
 
+/* Drag & drop urutan tugas: pegangan di kiri, item yang digeser terangkat */
+.sgg-task-handle {
+    width: 26px; height: 30px; flex-shrink: 0; margin-left: -6px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 0; border-radius: 6px; background: transparent; color: var(--muted);
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.sgg-task-handle svg { width: 18px; height: 18px; pointer-events: none; }
+.sgg-task-handle:hover { background: var(--line-2); color: var(--ink); }
+.sgg-task-handle:focus-visible { outline: 3px solid var(--pink-hi); outline-offset: 2px; color: var(--ink); }
+#detail-checklist-container.is-sorting { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+#detail-checklist-container.is-sorting .sgg-task-handle { cursor: grabbing; }
+.sgg-checklist-item.is-dragging {
+    position: relative; z-index: 2;
+    box-shadow: 4px 4px 0 var(--pink-hi); translate: -2px -2px; outline: 2px dashed var(--pink-hi); outline-offset: 2px;
+}
+
 .sgg-task-add { margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--line-2); }
 .sgg-task-add-label, .sgg-field span { display: block; margin-bottom: 6px; font: 600 12px var(--mono); color: var(--muted); }
 .sgg-task-add-row { display: flex; gap: 10px; }

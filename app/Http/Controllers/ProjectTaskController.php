@@ -6,8 +6,9 @@ use App\Models\Project;
 use App\Models\ProjectChecklist;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-// PIC menambah, mencentang, dan menghapus tugas project miliknya dari halaman beranda
+// PIC menambah, mencentang, mengurutkan, dan menghapus tugas project miliknya dari halaman beranda
 class ProjectTaskController extends Controller
 {
     public function store(Request $request, Project $project): JsonResponse
@@ -30,6 +31,37 @@ class ProjectTaskController extends Controller
         $checklist->update(['is_completed' => $data['is_completed']]);
 
         return $this->respond($request, $checklist->project);
+    }
+
+    /**
+     * Simpan urutan baru hasil drag & drop. Daftar id wajib berisi tepat semua tugas project ini.
+     */
+    public function reorder(Request $request, Project $project): JsonResponse
+    {
+        $this->authorizeProject($request, $project);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['required', 'integer', 'distinct'],
+        ]);
+
+        $ids = array_map('intval', $data['ids']);
+        $existingIds = $project->checklists()->pluck('id')->all();
+
+        if (count($ids) !== count($existingIds) || array_diff($ids, $existingIds) !== []) {
+            abort(422, 'Daftar tugas sudah berubah. Muat ulang halaman lalu coba lagi.');
+        }
+
+        // Query langsung tanpa event: urutan tidak memengaruhi status project
+        DB::transaction(function () use ($project, $ids) {
+            foreach ($ids as $index => $id) {
+                ProjectChecklist::whereKey($id)
+                    ->where('project_id', $project->id)
+                    ->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return $this->respond($request, $project);
     }
 
     public function destroy(Request $request, ProjectChecklist $checklist): JsonResponse

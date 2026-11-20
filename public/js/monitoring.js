@@ -19,6 +19,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 let currentProject = null;
 
 const CHECK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+const GRIP_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
 const CLOSE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
 
 // Mengamankan teks dari input pengguna sebelum disisipkan ke HTML
@@ -54,13 +55,17 @@ async function sendJson(url, method, body) {
     return data;
 }
 
-// Daftar tugas checklist; PIC pemilik project mendapat tombol centang, hapus, dan form tambah
+// Daftar tugas checklist; PIC pemilik project mendapat pegangan geser, tombol centang, hapus, dan form tambah
 function renderChecklist(p) {
     const canEdit = !!p.can_edit;
+    const canSort = canEdit && p.checklists.length > 1;
 
     const items = p.checklists.length === 0
         ? '<p class="sgg-modal-empty">Belum ada tugas pada project ini.</p>'
         : p.checklists.map(c => {
+            const handle = canSort
+                ? `<button type="button" class="sgg-task-handle" data-task-handle="${c.id}" aria-label="Geser untuk mengubah urutan tugas ${escapeHtml(c.title)} (atau tekan panah atas/bawah)" title="Geser untuk mengubah urutan">${GRIP_ICON}</button>`
+                : '';
             const box = canEdit
                 ? `<button type="button" class="sgg-checklist-checkbox sgg-checklist-checkbox--btn" data-task-toggle="${c.id}" aria-pressed="${c.is_completed}" aria-label="Ubah status tugas ${escapeHtml(c.title)}">${CHECK_ICON}</button>`
                 : `<div class="sgg-checklist-checkbox" aria-hidden="true">${CHECK_ICON}</div>`;
@@ -69,7 +74,8 @@ function renderChecklist(p) {
                 : '';
 
             return `
-        <div class="sgg-checklist-item ${c.is_completed ? 'checked' : ''}">
+        <div class="sgg-checklist-item ${c.is_completed ? 'checked' : ''}" data-task-id="${c.id}">
+            ${handle}
             ${box}
             <span class="sgg-checklist-label">${escapeHtml(c.title)}</span>
             <span class="sgg-checklist-state">${c.is_completed ? 'Selesai' : 'Belum Selesai'}</span>
@@ -140,8 +146,9 @@ function showTaskError(msg) {
     taskError.hidden = !msg;
 }
 
-// Jalankan perubahan tugas, lalu perbarui modal dan kartu dengan data dari server
-async function mutateTasks(request) {
+// Jalankan perubahan tugas, lalu perbarui modal dan kartu dengan data dari server.
+// revertOnError: tampilkan ulang data terakhir bila gagal (dipakai saat urutan sudah digeser di layar).
+async function mutateTasks(request, { revertOnError = false } = {}) {
     showTaskError('');
     checklistBox.classList.add('is-busy');
     try {
@@ -150,6 +157,7 @@ async function mutateTasks(request) {
         fillModal(project);
         applyProjectToCard(project);
     } catch (err) {
+        if (revertOnError && currentProject) fillModal(currentProject);
         showTaskError(err.message);
     } finally {
         checklistBox.classList.remove('is-busy');
@@ -168,6 +176,7 @@ function openDetailModal(cardEl) {
 
 // Menutup modal detail dan mengembalikan scroll halaman
 function closeDetailModal() {
+    endDrag(false);
     overlay.classList.remove('active');
     document.body.style.overflow = '';
     currentProject = null;
@@ -203,6 +212,122 @@ checklistBox.addEventListener('click', (e) => {
     if (del && confirm('Hapus tugas ini?')) {
         mutateTasks(() => sendJson(`/tasks/${del.dataset.taskDel}`, 'DELETE'));
     }
+});
+
+// ── Drag & drop urutan tugas ────────────────────────────────────────────────
+// Memakai pointer events (mouse, sentuh, pena) lewat pegangan di kiri tiap tugas.
+// Item dipindah langsung di DOM selama digeser; urutan disimpan ke server saat dilepas.
+
+let drag = null;
+
+function taskItems() {
+    return [...checklistBox.querySelectorAll('.sgg-checklist-item')];
+}
+
+function currentOrderIds() {
+    return taskItems().map(el => Number(el.dataset.taskId));
+}
+
+// Simpan urutan baru; tampilan langsung mengikuti, dikembalikan bila server menolak
+async function saveTaskOrder(ids, focusId) {
+    const byId = new Map(currentProject.checklists.map(c => [c.id, c]));
+    const previous = currentProject;
+    currentProject = { ...currentProject, checklists: ids.map(id => byId.get(id)) };
+    fillModal(currentProject);
+
+    await mutateTasks(async () => {
+        try {
+            return await sendJson(`/projects/${previous.id}/tasks/order`, 'PUT', { ids });
+        } catch (err) {
+            currentProject = previous;
+            throw err;
+        }
+    }, { revertOnError: true });
+
+    if (focusId) checklistBox.querySelector(`[data-task-handle="${focusId}"]`)?.focus();
+}
+
+checklistBox.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('[data-task-handle]');
+    if (!handle || !currentProject || drag || checklistBox.classList.contains('is-busy')) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    e.preventDefault();
+    const item = handle.closest('.sgg-checklist-item');
+    drag = { item, handle, pointerId: e.pointerId, startIds: currentOrderIds() };
+    handle.setPointerCapture(e.pointerId);
+    item.classList.add('is-dragging');
+    checklistBox.classList.add('is-sorting');
+});
+
+checklistBox.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+
+    // Taruh item sebelum tugas pertama yang titik tengahnya berada di bawah pointer
+    const others = taskItems().filter(el => el !== drag.item);
+    const next = others.find(el => {
+        const r = el.getBoundingClientRect();
+        return e.clientY < r.top + r.height / 2;
+    });
+    if (next) {
+        if (drag.item.nextElementSibling !== next) checklistBox.insertBefore(drag.item, next);
+    } else {
+        const last = others[others.length - 1];
+        if (last && last.nextElementSibling !== drag.item) last.after(drag.item);
+    }
+
+    // Gulir otomatis saat pointer mendekati tepi atas/bawah area modal
+    const body = checklistBox.closest('.sgg-modal-body');
+    if (body) {
+        const r = body.getBoundingClientRect();
+        if (e.clientY < r.top + 48) body.scrollTop -= 14;
+        else if (e.clientY > r.bottom - 48) body.scrollTop += 14;
+    }
+});
+
+// Selesai menggeser: simpan bila urutan berubah, atau kembalikan bila dibatalkan
+function endDrag(commit) {
+    if (!drag) return;
+    const { item, handle, pointerId, startIds } = drag;
+    drag = null;
+
+    item.classList.remove('is-dragging');
+    checklistBox.classList.remove('is-sorting');
+    if (handle.hasPointerCapture?.(pointerId)) handle.releasePointerCapture(pointerId);
+
+    const ids = currentOrderIds();
+    const changed = ids.some((id, i) => id !== startIds[i]);
+    if (!changed) return;
+
+    if (commit && currentProject) {
+        saveTaskOrder(ids);
+    } else if (currentProject) {
+        fillModal(currentProject);
+    }
+}
+
+checklistBox.addEventListener('pointerup', (e) => {
+    if (drag && e.pointerId === drag.pointerId) endDrag(true);
+});
+checklistBox.addEventListener('pointercancel', (e) => {
+    if (drag && e.pointerId === drag.pointerId) endDrag(false);
+});
+
+// Alternatif keyboard: fokus pada pegangan lalu tekan panah atas/bawah
+checklistBox.addEventListener('keydown', (e) => {
+    const handle = e.target.closest('[data-task-handle]');
+    if (!handle || !currentProject || checklistBox.classList.contains('is-busy')) return;
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+
+    e.preventDefault();
+    const id = Number(handle.dataset.taskHandle);
+    const ids = currentProject.checklists.map(c => c.id);
+    const from = ids.indexOf(id);
+    const to = from + (e.key === 'ArrowUp' ? -1 : 1);
+    if (from < 0 || to < 0 || to >= ids.length) return;
+
+    [ids[from], ids[to]] = [ids[to], ids[from]];
+    saveTaskOrder(ids, id);
 });
 
 // Tambah tugas baru
